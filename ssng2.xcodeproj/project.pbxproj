@@ -3,23 +3,43 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2829F89D1B9D25C91FC0EE42 /* Pods_ssng2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 346FB42E498FFD13B962A79C /* Pods_ssng2.framework */; };
 		57A444CB26454A3F00FAFEC1 /* ssng2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A444CA26454A3F00FAFEC1 /* ssng2App.swift */; };
 		57A444CD26454A3F00FAFEC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A444CC26454A3F00FAFEC1 /* ContentView.swift */; };
 		57A444CF26454A4000FAFEC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A444CE26454A4000FAFEC1 /* Assets.xcassets */; };
 		57A444D226454A4000FAFEC1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A444D126454A4000FAFEC1 /* Preview Assets.xcassets */; };
+		57BB8B6A264A04DB00B0DA72 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B64264A04DA00B0DA72 /* Global.swift */; };
+		57BB8B6B264A04DB00B0DA72 /* SendEl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B65264A04DA00B0DA72 /* SendEl.swift */; };
+		57BB8B6C264A04DB00B0DA72 /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B66264A04DA00B0DA72 /* Controller.swift */; };
+		57BB8B6D264A04DB00B0DA72 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B67264A04DB00B0DA72 /* Const.swift */; };
+		57BB8B6E264A04DB00B0DA72 /* ReceiveEl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B68264A04DB00B0DA72 /* ReceiveEl.swift */; };
+		57BB8B70264A14A600B0DA72 /* getIFAddresses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B6F264A14A600B0DA72 /* getIFAddresses.swift */; };
+		57CEA5F126455F0300FF3E88 /* InSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CEA5EF26455F0300FF3E88 /* InSocket.swift */; };
+		57CEA5F226455F0300FF3E88 /* OutSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CEA5F026455F0300FF3E88 /* OutSocket.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1CBB20F5B715D9C050218960 /* Pods-ssng2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ssng2.debug.xcconfig"; path = "Target Support Files/Pods-ssng2/Pods-ssng2.debug.xcconfig"; sourceTree = "<group>"; };
+		346FB42E498FFD13B962A79C /* Pods_ssng2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ssng2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5747285C008135CC7D167EB6 /* Pods-ssng2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ssng2.release.xcconfig"; path = "Target Support Files/Pods-ssng2/Pods-ssng2.release.xcconfig"; sourceTree = "<group>"; };
 		57A444C726454A3F00FAFEC1 /* ssng2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ssng2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57A444CA26454A3F00FAFEC1 /* ssng2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ssng2App.swift; sourceTree = "<group>"; };
 		57A444CC26454A3F00FAFEC1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		57A444CE26454A4000FAFEC1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		57A444D126454A4000FAFEC1 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		57A444D326454A4000FAFEC1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		57BB8B64264A04DA00B0DA72 /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		57BB8B65264A04DA00B0DA72 /* SendEl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendEl.swift; sourceTree = "<group>"; };
+		57BB8B66264A04DA00B0DA72 /* Controller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
+		57BB8B67264A04DB00B0DA72 /* Const.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
+		57BB8B68264A04DB00B0DA72 /* ReceiveEl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReceiveEl.swift; sourceTree = "<group>"; };
+		57BB8B6F264A14A600B0DA72 /* getIFAddresses.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = getIFAddresses.swift; sourceTree = "<group>"; };
+		57CEA5EF26455F0300FF3E88 /* InSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InSocket.swift; sourceTree = "<group>"; };
+		57CEA5F026455F0300FF3E88 /* OutSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutSocket.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2829F89D1B9D25C91FC0EE42 /* Pods_ssng2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +59,8 @@
 			children = (
 				57A444C926454A3F00FAFEC1 /* ssng2 */,
 				57A444C826454A3F00FAFEC1 /* Products */,
+				CDADA183B7D498082841B601 /* Pods */,
+				DE7411AD629AFCE4CB5656EE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,6 +77,14 @@
 			children = (
 				57A444CA26454A3F00FAFEC1 /* ssng2App.swift */,
 				57A444CC26454A3F00FAFEC1 /* ContentView.swift */,
+				57BB8B67264A04DB00B0DA72 /* Const.swift */,
+				57BB8B66264A04DA00B0DA72 /* Controller.swift */,
+				57BB8B6F264A14A600B0DA72 /* getIFAddresses.swift */,
+				57BB8B64264A04DA00B0DA72 /* Global.swift */,
+				57BB8B68264A04DB00B0DA72 /* ReceiveEl.swift */,
+				57BB8B65264A04DA00B0DA72 /* SendEl.swift */,
+				57CEA5EF26455F0300FF3E88 /* InSocket.swift */,
+				57CEA5F026455F0300FF3E88 /* OutSocket.swift */,
 				57A444CE26454A4000FAFEC1 /* Assets.xcassets */,
 				57A444D326454A4000FAFEC1 /* Info.plist */,
 				57A444D026454A4000FAFEC1 /* Preview Content */,
@@ -69,6 +100,23 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		CDADA183B7D498082841B601 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1CBB20F5B715D9C050218960 /* Pods-ssng2.debug.xcconfig */,
+				5747285C008135CC7D167EB6 /* Pods-ssng2.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		DE7411AD629AFCE4CB5656EE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				346FB42E498FFD13B962A79C /* Pods_ssng2.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -76,9 +124,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 57A444D626454A4000FAFEC1 /* Build configuration list for PBXNativeTarget "ssng2" */;
 			buildPhases = (
+				8F5C283F9ABD0BA75D11B276 /* [CP] Check Pods Manifest.lock */,
 				57A444C326454A3E00FAFEC1 /* Sources */,
 				57A444C426454A3E00FAFEC1 /* Frameworks */,
 				57A444C526454A3E00FAFEC1 /* Resources */,
+				EEFAE892D6B551C2DF010AA7 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -133,13 +183,63 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		8F5C283F9ABD0BA75D11B276 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ssng2-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EEFAE892D6B551C2DF010AA7 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ssng2/Pods-ssng2-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ssng2/Pods-ssng2-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ssng2/Pods-ssng2-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		57A444C326454A3E00FAFEC1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57CEA5F126455F0300FF3E88 /* InSocket.swift in Sources */,
 				57A444CD26454A3F00FAFEC1 /* ContentView.swift in Sources */,
+				57BB8B70264A14A600B0DA72 /* getIFAddresses.swift in Sources */,
+				57BB8B6E264A04DB00B0DA72 /* ReceiveEl.swift in Sources */,
+				57BB8B6A264A04DB00B0DA72 /* Global.swift in Sources */,
 				57A444CB26454A3F00FAFEC1 /* ssng2App.swift in Sources */,
+				57CEA5F226455F0300FF3E88 /* OutSocket.swift in Sources */,
+				57BB8B6B264A04DB00B0DA72 /* SendEl.swift in Sources */,
+				57BB8B6C264A04DB00B0DA72 /* Controller.swift in Sources */,
+				57BB8B6D264A04DB00B0DA72 /* Const.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +364,7 @@
 		};
 		57A444D726454A4000FAFEC1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1CBB20F5B715D9C050218960 /* Pods-ssng2.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -286,6 +387,7 @@
 		};
 		57A444D826454A4000FAFEC1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5747285C008135CC7D167EB6 /* Pods-ssng2.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

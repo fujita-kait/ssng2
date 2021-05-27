@@ -7,26 +7,51 @@ import Foundation
 
 class Controller: ObservableObject {
   let myIpList = getIFAddresses()
+  let esvList: [UInt8] = [0x61, 0x62, 0x73]
   @Published var nodes: [Node] = [ EL.defaultNode ]
   @Published var selectedNode: Int = 0 {
     didSet {
       selectedEoj = 0
-      id2 = UUID()  // Update PickerView(EOJ)
-      print("node changed, selectedNode: \(selectedNode)")
+      selectedEsv = 1 // 0x62
+      selectedEpc = 0
+      selectedEdt = 0
+      idPvEoj = UUID()  // Update PickerView(EOJ)
+      idPvEsv = UUID()  // Update PickerView(ESV)
+      idPvEpc = UUID()  // Update PickerView(EPC)
+      idPvEdt = UUID()  // Update PickerView(EDT)
+      print("PV-IP changed, selectedNode: \(selectedNode)")
     }
   }
-    @Published var selectedEoj: Int = 0 {
+  @Published var selectedEoj: Int = 0 {
     didSet {
-      print("eoj changed, selectedEoj: \(selectedEoj)")
+      print("PV-EOJ changed, selectedEoj: \(selectedEoj)")
     }
   }
-  
+
+  @Published var selectedEsv: Int = 1 {
+    didSet {
+      print("PV-ESV changed, selectedEsv: \(selectedEsv)")
+    }
+  }
+
+  @Published var selectedEpc: Int = 0 {
+    didSet {
+      print("PV-EPC changed, selectedEpc: \(selectedEpc)")
+    }
+  }
+
+  @Published var selectedEdt: Int = 0 {
+    didSet {
+      print("PV-EDT changed, selectedEdt: \(selectedEdt)")
+    }
+  }
+
   // idx is updated to redraw PickerView
-  @Published var id1: UUID = UUID() // id for PickerView(Node)
-  @Published var id2: UUID = UUID() // id for PickerView(EOJ)
-  @Published var id3: UUID = UUID() // id for PickerView(ESV)
-  @Published var id4: UUID = UUID() // id for PickerView(EPC)
-  @Published var id5: UUID = UUID() // id for PickerView(EDT)
+  @Published var idPvNode: UUID = UUID() // id for PickerView(Node)
+  @Published var idPvEoj: UUID = UUID() // id for PickerView(EOJ)
+  @Published var idPvEsv: UUID = UUID() // id for PickerView(ESV)
+  @Published var idPvEpc: UUID = UUID() // id for PickerView(EPC)
+  @Published var idPvEdt: UUID = UUID() // id for PickerView(EDT)
 
   // for PickerView
   var addressList: [String] {
@@ -39,11 +64,18 @@ class Controller: ObservableObject {
       eoj.code
     }
   }
+  var esvCodeList: [String] {
+    esvList.map{(a: UInt8) -> String in String(format:"%02X", a)}
+  }
+  var epcCodeList: [String] {
+    [String](EL.esv.keys).sorted()
+  }
 
-  // View: Received from
-  @Published var address = String()       // source IP Address: example: "192.168.1.2"
-  // View: Received Data
-  @Published var udpData = String()       // received UDP data in HEX string
+  @Published var udpSentData = String()   // View Tx: sent UDP data in HEX string
+  @Published var address = String()       // View Rx: source IP Address: example: "192.168.1.2"
+  @Published var udpData = String()       // View Rx data: received UDP data in HEX string
+  @Published var rxEpc = String()       // View Rx epc
+  @Published var rxEdt = String()       // View Rx edt
 
   var receiveEl: ReceiveEl!    // for receiving data
   var sendEl: SendEl!          // for sending data
@@ -62,8 +94,14 @@ class Controller: ObservableObject {
   @objc func receiveElData(_ notification: Notification) {
     address = receiveEl.address
     udpData = receiveEl.udpData
+    let esv = receiveEl.esv
+    let seoj = receiveEl.seoj
+    let epc = receiveEl.messages[0].epc
+    rxEpc = ""
+    rxEdt = ""
     
-    switch receiveEl.esv {
+//    switch receiveEl.esv {
+    switch esv {
     case 0x60, 0x61:  // SetI or SetC
       break
     case 0x62:  // Get: reply to 80, 8A and D6
@@ -93,10 +131,16 @@ class Controller: ObservableObject {
       break
     case 0x72, 0x73:  // Get_Res(0x72) or INF(0x73)
       print("case 0x72 0x73")
-      infomation = ""
-      switch receiveEl.messages[0].epc {
-      case UInt8(0xD5), UInt8(0xD6): // Instance ListS: append a node to nodes
-        print("0x72,0x73 - D5, D6")
+      rxEpc = String(format:"%02X", receiveEl.messages[0].epc)
+      rxEdt = String(receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined())
+//      infomation = ""
+
+//      switch receiveEl.messages[0].epc {
+      switch epc {
+      // Instance ListS: append a node to nodes
+//      case UInt8(0xD5), UInt8(0xD6):
+      case 0xD5, 0xD6:
+        print("case EPC:D5, D6")
         if myIpList.contains(address) {
           print("\(address) is loopback, ignore")
           return
@@ -113,23 +157,63 @@ class Controller: ObservableObject {
         }
 //        print("node: \(node)")
         nodes.append(node)
-        id1 = UUID()
-        id2 = UUID()
-        getMakerCode(ipAddress: address)
-      case UInt8(0x8A): // Maker Code: append Maker Code to nodeList
-        print("0x72,0x73 - 8A")
+        idPvNode = UUID()  // update PV IP
+        idPvEoj = UUID()  // update PV DEOJ
+        elGet(address: address, epc: 0x8A)  // Get maker code
+//        getMakerCode(ipAddress: address)
+        for eoj in node.eojs {
+          elGet(address: address, deoj:eoj.hex, epc: 0x9D)
+          elGet(address: address, deoj:eoj.hex, epc: 0x9E)
+          elGet(address: address, deoj:eoj.hex, epc: 0x9F)
+        }
+      
+      // Maker Code: append Maker Code to a node
+//      case UInt8(0x8A):
+      case 0x8A:
+        print("case EPC:8A")
         let makerCode = receiveEl.messages[0].edt
         if makerCode.count == 3 {
           for (index, node) in nodes.enumerated() {
             if node.address == address {
               nodes[index].makerCode = makerCode.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()
               print("node.makerCode: \(node.makerCode)")
-              print("nodes: \(nodes)")
+//              print("nodes: \(nodes)")
             }
           }
         }
-      case UInt8(0x9D), UInt8(0x9E), UInt8(0x9F): // Property Map: Parse EDT data
-        infomation = propertyMap(edt: receiveEl.messages[0].edt)
+      
+      // Property Map: Decode EDT data and append it to a node
+//      case UInt8(0x9D): // inf
+      case 0x9D, 0x9E, 0x9F: // inf, set, get property map
+        print("case EPC:9D, 9E, 9F")
+        for (index, node) in nodes.enumerated() {
+//          print("index \(index)")
+          if node.address == address {
+            for var eoj in nodes[index].eojs {
+              if eoj.hex == seoj {
+//                print("epc \(epc)")
+                if epc == 0x9D {
+                  eoj.instanceListInf = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  print("instanceListInf: \(String(describing: eoj.instanceListInf))")
+                } else if epc == 0x9E {
+                  eoj.instanceListSet = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  print("instanceListSet: \(String(describing: eoj.instanceListSet))")
+                } else {
+                  eoj.instanceListGet = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  print("instanceListGet: \(String(describing: eoj.instanceListGet))")
+                }
+              }
+            }
+          }
+        }
+
+      case UInt8(0x9E): // Set
+        print("9E")
+
+      case UInt8(0x9F): // Get
+        print("9F")
+
+//        infomation = propertyMap(edt: receiveEl.messages[0].edt)
       case UInt8(0x80):   // for method "findDevice"
         if findDevice.ip != "" {
           if receiveEl.address == findDevice.ip {
@@ -148,24 +232,24 @@ class Controller: ObservableObject {
     default:
       print("Obj:ESV error \(receiveEl.esv)")
     }
-//    ips = ["224.0.23.0"]
+  }
+
+    //    ips = ["224.0.23.0"]
 //    for node in nodeList {
 //      ips.append(node.ip)
 //    }
     //    ips = Array(nodeList.keys)
     //    ips = ["192.168.0.1","192.168.0.2","192.168.0.3"]
 //    print(ips)
-  }
   
-  func clearNodeList() {
+//  func clearNodeList() {
 //    nodeList = [NodeInfo(ip: "224.0.23.0")]
 //    ips = ["224.0.23.0"]
-  }
+//  }
   
   /// Send data based on PV
-  func send(ipAddress: String, deoj:[UInt8], esv:UInt8, epc:UInt8, edt:[UInt8]) {
+  func send(address: String, deoj:[UInt8], esv:UInt8, epc:UInt8, edt:[UInt8]) {
     var message = ElMessage(epc: UInt8(0x00), edt: [])
-    // create message
     message.epc = epc
     message.edt = []
     sendEl.tid = [0x00, tid]
@@ -177,9 +261,10 @@ class Controller: ObservableObject {
       message.edt = edt
     }
     sendEl.messages = [message]
-    if (!sendEl.send(address: ipAddress)) {
+    if (!sendEl.send(address: address)) {
       print("Send failed")
     }
+    udpSentData = sendEl.udpData
     tid = incrementTid(tid: tid)     // update on 2016.03.26
   }
   
@@ -217,22 +302,40 @@ class Controller: ObservableObject {
     }
     print("Obj:sendSNA: \(sendEl.esv)")
   }
-  
-  /// Send Get(DEOJ:node, EPC:D6) to Multicast Address
-  func search() {
-    var message = ElMessage(epc: UInt8(0x00), edt: [])
-    // create message
-    message.epc = 0xD6                  // instance list S
+
+  /// Send ECHONET Lite Get message
+  func elGet(address: String = "224.0.23.0", deoj: [UInt8] = [0x0E, 0xF0, 0x01], epc: UInt8) {
+    let message = ElMessage(epc: UInt8(epc), edt: [])
     sendEl.tid = [0x00, tid]
     sendEl.seoj = [0x05, 0xFF, 0x01]    // controller
-    sendEl.deoj = [0x0E, 0xF0, 0x01]    // node
+    sendEl.deoj = deoj    // node
     sendEl.esv  = 0x62                  // Get
     sendEl.messages = [message]
-    if (!sendEl.send(address: "224.0.23.0")) {
-      print("Send failed to 224.0.23.0")
+    if (!sendEl.send(address: address)) {
+      print("Send failed")
     }
     tid = incrementTid(tid: tid)     // update on 2016.03.26
   }
+
+  func search() {
+    elGet(epc: 0xD6)
+  }
+
+//  /// Send Get(DEOJ:node, EPC:D6) to Multicast Address
+//  func search() {
+//    var message = ElMessage(epc: UInt8(0x00), edt: [])
+//    // create message
+//    message.epc = 0xD6                  // instance list S
+//    sendEl.tid = [0x00, tid]
+//    sendEl.seoj = [0x05, 0xFF, 0x01]    // controller
+//    sendEl.deoj = [0x0E, 0xF0, 0x01]    // node
+//    sendEl.esv  = 0x62                  // Get
+//    sendEl.messages = [message]
+//    if (!sendEl.send(address: "224.0.23.0")) {
+//      print("Send failed to 224.0.23.0")
+//    }
+//    tid = incrementTid(tid: tid)     // update on 2016.03.26
+//  }
   
   /// Send INF(DEOJ:node, EPC:D5) to Multicast Address
   func infD5() {
@@ -252,20 +355,19 @@ class Controller: ObservableObject {
   }
   
   /// Send Get(DEOJ:node, EPC:8A) to Unicast Address
-  func getMakerCode(ipAddress: String) {
-    var message = ElMessage(epc: UInt8(0x00), edt: [])
-    // create message
-    message.epc = 0x8A                  // maker code
-    sendEl.tid = [0x00, tid]
-    sendEl.seoj = [0x05, 0xFF, 0x01]    // controller
-    sendEl.deoj = [0x0E, 0xF0, 0x01]    // node
-    sendEl.esv  = 0x62                  // Get
-    sendEl.messages = [message]
-    if (!sendEl.send(address: ipAddress)) {
-      print("Send failed")
-    }
-    tid = incrementTid(tid: tid)     // update on 2016.03.26
-  }
+//  func getMakerCode(ipAddress: String) {
+//    let message = ElMessage(epc: UInt8(0x8A), edt: [])
+////    message.epc = 0x8A                  // maker code
+//    sendEl.tid = [0x00, tid]
+//    sendEl.seoj = [0x05, 0xFF, 0x01]    // controller
+//    sendEl.deoj = [0x0E, 0xF0, 0x01]    // node
+//    sendEl.esv  = 0x62                  // Get
+//    sendEl.messages = [message]
+//    if (!sendEl.send(address: ipAddress)) {
+//      print("Send failed")
+//    }
+//    tid = incrementTid(tid: tid)     // update on 2016.03.26
+//  }
   
   /// Increment TID   // update on 2016.03.26
   func incrementTid(tid: UInt8) -> UInt8 {
@@ -278,15 +380,15 @@ class Controller: ObservableObject {
     return tmp
   }
   
-  /// Parse Property Map(EPC=0x9D,9E and 9F) and return a list of EPC in String
-  func propertyMap(edt: [UInt8]) -> String {
+  // decode property map
+  func decodePropertyMap(edt: [UInt8]) -> [UInt8] {
     var propertyArray = [UInt8]()
     var bitmapArray = [UInt8]()
-    var propertyStringArray = [String]()
+//    var propertyStringArray = [String]()
     
     switch edt.count {
     case 0:
-      return "Error: EDT is 0 byte"
+      return []
     case 1...16:
       propertyArray = Array(edt[1..<edt.count])
     case 17:
@@ -299,11 +401,46 @@ class Controller: ObservableObject {
         }
       }
     default:
-      return "Error: EDT is more than 17 byte"
+      return []
     }
-    propertyStringArray = propertyArray.map{(a: UInt8) -> String in String(format:"%02X", a)}
-    propertyStringArray.sort()       // sort
-    return ("EPC: " + propertyStringArray.joined(separator: " "))
+    propertyArray.sort()
+    return propertyArray
+  }
+//    propertyStringArray = propertyArray.map{(a: UInt8) -> String in String(format:"%02X", a)}
+//    propertyStringArray.sort()       // sort
+//    return ("EPC: " + propertyStringArray.joined(separator: " "))
+
+  
+  /// Parse Property Map(EPC=0x9D,9E and 9F) and return a list of EPC in String
+//  func propertyMap(edt: [UInt8]) -> String {
+//    var propertyArray = [UInt8]()
+//    var bitmapArray = [UInt8]()
+//    var propertyStringArray = [String]()
+//
+//    switch edt.count {
+//    case 0:
+//      return "Error: EDT is 0 byte"
+//    case 1...16:
+//      propertyArray = Array(edt[1..<edt.count])
+//    case 17:
+//      bitmapArray = Array(edt[1..<edt.count])
+//      for i: UInt8 in 0..<16 {
+//        for j:UInt8 in 0..<8 {
+//          if (bitmapArray[Int(i)] & (UInt8(0b00000001) << j)) != 0 {
+//            propertyArray += [0x80 + (0x10 * j) + i]
+//          }
+//        }
+//      }
+//    default:
+//      return "Error: EDT is more than 17 byte"
+//    }
+//    propertyStringArray = propertyArray.map{(a: UInt8) -> String in String(format:"%02X", a)}
+//    propertyStringArray.sort()       // sort
+//    return ("EPC: " + propertyStringArray.joined(separator: " "))
+//  }
+  
+  func spot() {
+    print("SPOT")
   }
   
   /// In order to find a device with given IP address, turn the ON/OFF status

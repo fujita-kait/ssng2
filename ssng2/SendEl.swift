@@ -49,7 +49,7 @@ class SendEl {
     }
     
     //        print("SendEl:sendData: \(sendData)")
-    let udpDataTmp = sendData.map{(a: UInt8) -> String in String(format:"%02X", a)}   // [UInt8] -> [String]
+    let udpDataTmp = sendData.map{(a: UInt8) -> String in String(format:"%02X", a)} // [UInt8] -> [String]
     udpData = udpDataTmp[0] + udpDataTmp[1] + " " + udpDataTmp[2] + udpDataTmp[3] + " " + udpDataTmp[4] + udpDataTmp[5] + udpDataTmp[6] + " " + udpDataTmp[7] + udpDataTmp[8] + udpDataTmp[9] + " " + udpDataTmp[10] + " " + udpDataTmp[11] + " "
     for i in 12 ..< udpDataTmp.count {
       udpData += udpDataTmp[i]

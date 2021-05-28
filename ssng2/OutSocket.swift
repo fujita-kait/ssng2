@@ -1,17 +1,14 @@
+//  ssng2:OutSocket.swift
 //
-//  OutSocket.swift
-//  Udp-01
-//
-//  Created by 藤田 on 2020/02/21.
-//  Copyright 2020 KAIT. All rights reserved.
-//
+//  Created by 藤田 on 2021/05/28
+//  Copyright 2021 KAIT. All rights reserved.
 
 import Foundation
 import CocoaAsyncSocket
 
 class OutSocket: NSObject, GCDAsyncUdpSocketDelegate {
     var socket:GCDAsyncUdpSocket!
-    let portEL = UInt16(3610)
+  let portEL = UInt16(EL.portEL)
     
     override init(){
         super.init()

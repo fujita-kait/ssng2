@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct ssng2App: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
     }
+  }
+  init(){
+    print("init")
+  }
 }

@@ -1,6 +1,4 @@
-//
-// ContentView.swift
-// ssng2
+// ssng2:ContentView.swift
 //
 // Created by Hiro Fujita on 2021/05/07.
 //
@@ -8,24 +6,9 @@
 import SwiftUI
 
 struct ContentView: View {
-//  let myIpList = getIFAddresses()
-//  var ips = ["224.0.23.0", "192.168.0.1", "192.168.0.2"]
-//  var eojs: [[UInt8]] = [[0x01,0x30,0x01],[0x01,0x30,0x02],[0x0E,0xF0,0x01]]
-//  var esvs: [UInt8] = [0x61, 0x62, 0x73]
-  var epcs: [UInt8] = [0x80, 0xA0, 0xB0]
-  //  var edts = [[UInt8(0x30)]]
-  //  var edts: [[UInt8]]  = [[0x30],[0x31]]
-  var edts: [UInt8]  = [0x30,0x31]
-//  @State private var ipSelection = 0
-//  @State private var eojSelection = 0
-//  @State private var selectedEsv = 1
-//  @State private var selectedEpc = 0
-//  @State private var selectedEdt = 0
-
+  var edts: [UInt8]  = [0x30, 0x31]
   var outSocket = OutSocket()
   @ObservedObject var controller = Controller()
-  let addressTo = "224.0.23.0"
-  let byteArray: [UInt8] = [0x10,0x81,0x00,0x00,0x05,0xff,0x01,0x0e,0xf0,0x01,0x62,0x01,0x80,0x00]
   
   var body: some View {
     GeometryReader { geometry in
@@ -36,15 +19,10 @@ struct ContentView: View {
             print("Send EL")
             controller.send(
               address: controller.addressList[controller.selectedNode],
-              deoj: controller.nodes[controller.selectedNode].eojs[controller.selectedEoj].hex,
-//              esv: esvs[self.selectedEsv],
-//              epc: epcs[self.selectedEpc],
-//              edt: Array(repeating: edts[self.selectedEdt], count:1))
-//              esv: esvs[controller.selectedEsv],
-              esv: controller.esvList[controller.selectedEsv],
-              epc: epcs[controller.selectedEpc],
+              deoj: controller.nodes[controller.selectedNode].deviceObjs[controller.selectedEoj].eoj,
+              esv: UInt8(controller.esvCodeList[controller.selectedEsv], radix:16)!,
+              epc: UInt8(controller.epcCodeList[controller.selectedEpc], radix:16)!,
               edt: Array(repeating: edts[controller.selectedEdt], count:1))
-            //            self.outSocket.sendBinary(Data(self.byteArray), address: self.addressTo)
           }) {
             Text("SEND ").font(.title)
           }
@@ -78,11 +56,11 @@ struct ContentView: View {
           Text(" ")
         }.padding()
         HStack {
+          // PV-IP
           VStack(spacing: 5) {
             Text("IP").font(.headline)
             Picker(selection: $controller.selectedNode, label: Text("")){
               ForEach(0 ..< controller.addressList.count){ index in
-//                Text(self.controller.addressList[index]).font(.title)
                 Text(controller.addressList[index]).font(.title)
               }
             }
@@ -91,6 +69,7 @@ struct ContentView: View {
             Text("S: \(controller.selectedNode),  \(controller.nodes[controller.selectedNode].makerCode)")
           }
           
+          // PV-EOJ
           VStack(spacing: 5) {
             Text("EOJ").font(.headline)
             Picker(selection: $controller.selectedEoj, label: Text("")){
@@ -103,42 +82,36 @@ struct ContentView: View {
             Text("Selection: \(controller.selectedEoj)")
           }
           
+          // PV-ESV
           VStack(spacing: 5) {
             Text("ESV").font(.headline)
-//            Picker(selection: $selectedEsv, label: Text("Label")) {
             Picker(selection: $controller.selectedEsv, label: Text("Label")) {
               ForEach(0 ..< controller.esvCodeList.count){ index in
                 Text(controller.esvCodeList[index]).font(.title)
               }
-//              ForEach(0 ..< esvs.count) {
-//                Text(String(esvs[$0], radix: 16).uppercased()).font(.title)
-//              }
             }
             .id(controller.idPvEsv)
             .labelsHidden().frame(width: geometry.size.width * (1/8), height: 100).clipped()
-//            Text("Selection: \(selectedEsv)")
             Text("Selection: \(controller.selectedEsv)")
             
           }
+
+          // PV-EPC
           VStack(spacing: 5) {
             Text("EPC").font(.headline)
-//            Picker(selection: self.$selectedEpc, label: Text("Label")) {
             Picker(selection: $controller.selectedEpc, label: Text("Label")) {
-//              ForEach(0 ..< self.epcs.count) {
-//                Text(String(self.epcs[$0], radix: 16).uppercased()).font(.title)
-              ForEach(0 ..< self.epcs.count) {
-                Text(String(self.epcs[$0], radix: 16).uppercased()).font(.title)
+              ForEach(0 ..< controller.epcCodeList.count){ index in
+                Text(controller.epcCodeList[index]).font(.title)
               }
             }
             .id(controller.idPvEpc)
             .labelsHidden().frame(width: geometry.size.width * (1/8), height: 100).clipped()
-//            Text("Selection: \(self.selectedEpc)")
             Text("Selection: \(controller.selectedEpc)")
           }
-          
+
+          // PV-EDT
           VStack(spacing: 5) {
             Text("EDT").font(.headline)
-//            Picker(selection: self.$selectedEdt, label: Text("Label")) {
             Picker(selection: $controller.selectedEdt, label: Text("Label")) {
               ForEach(0 ..< self.edts.count) {
                 Text(String(self.edts[$0], radix: 16).uppercased()).font(.title)
@@ -146,26 +119,16 @@ struct ContentView: View {
             }
             .id(controller.idPvEdt)
             .labelsHidden().frame(width: geometry.size.width * (2/8), height: 100).clipped()
-//            Text("Selection: \(self.selectedEdt)")
             Text("Selection: \(controller.selectedEdt)")
           }
         }
-        HStack {
-          List{
-            Text("Tx: \(controller.udpSentData)")
-            Text("Rx: \(controller.address)")
-            Text("\(controller.udpData)")
-          }.frame(width: geometry.size.width * (6/8))
-          List{
-            Text("EPC: \(controller.rxEpc)")
-            Text("EDT: \(controller.rxEdt)")
-          }.frame(width: geometry.size.width * (2/8))
+        List{
+          Text("Tx: \(controller.udpSentData)")
+          Text("Rx: \(controller.address): \(controller.udpData)")
+          Text("EPC: \(controller.rxEpc), EDT: \(controller.rxEdt)")
         }
-        
       }
-      
     }
-    
   }
 }
 

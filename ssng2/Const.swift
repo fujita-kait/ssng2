@@ -6,35 +6,39 @@
 import Foundation
 
 struct EL {
+  static let mcAddress = "224.0.23.0"
+  static let portEL = 3610
+  static let ehd = Ehd(d1: 0x10, d2: 0x81)
   static let defaultNode = Node(
     address:"224.0.23.0",makerCode:"000077",
-    eojs:[
-      Eoj(d1:0x00,d2:0x11,d3:0x01),
-      Eoj(d1:0x00,d2:0x12,d3:0x01),
-      Eoj(d1:0x00,d2:0x2D,d3:0x01),
-      Eoj(d1:0x01,d2:0x30,d3:0x01),
-      Eoj(d1:0x01,d2:0x33,d3:0x01),
-      Eoj(d1:0x01,d2:0x35,d3:0x01),
-      Eoj(d1:0x02,d2:0x60,d3:0x01),
-      Eoj(d1:0x02,d2:0x6B,d3:0x01),
-      Eoj(d1:0x02,d2:0x6F,d3:0x01),
-      Eoj(d1:0x02,d2:0x72,d3:0x01),
-      Eoj(d1:0x02,d2:0x73,d3:0x01),
-      Eoj(d1:0x02,d2:0x79,d3:0x01),
-      Eoj(d1:0x02,d2:0x7A,d3:0x01),
-      Eoj(d1:0x02,d2:0x7B,d3:0x01),
-      Eoj(d1:0x02,d2:0x7D,d3:0x01),
-      Eoj(d1:0x02,d2:0x87,d3:0x01),
-      Eoj(d1:0x02,d2:0x88,d3:0x01),
-      Eoj(d1:0x02,d2:0x90,d3:0x01),
-      Eoj(d1:0x02,d2:0x91,d3:0x01),
-      Eoj(d1:0x03,d2:0xB7,d3:0x01),
-      Eoj(d1:0x05,d2:0xFF,d3:0x01)
+    deviceObjs:[
+      DeviceObj(eoj: Eoj(d1:0x00,d2:0x11,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x00,d2:0x12,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x00,d2:0x2D,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x01,d2:0x30,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x01,d2:0x33,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x01,d2:0x35,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x60,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x6B,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x6F,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x72,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x73,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x79,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x7A,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x7B,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x7D,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x87,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x88,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x90,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x91,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x03,d2:0xB7,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x05,d2:0xFF,d3:0x01))
     ]
   )
   
   // ESV
-  static let esv:[String:String] = ["60":"SetI","61":"SetC","62":"Get","63":"Inf_Req","73":"Inf"]
+//  static let esv:[String:String] = ["60":"SetI","61":"SetC","62":"Get","63":"Inf_Req","73":"Inf"]
+  static let esv:[String:String] = ["61":"SetC","62":"Get","73":"Inf"]
 
   // Data type "state"
   static let stateLevelAndAuto:[String:String] = ["41":"Automatic","31":"1","32":"2","33":"3","34":"4","35":"5","36":"6","37":"7","38":"8"]

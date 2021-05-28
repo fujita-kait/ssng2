@@ -7,12 +7,45 @@
 
 import Foundation
 
-struct Node {
-  var address: String // "192.169.0.1"
-  var makerCode: String // "000077"
-  var eojs: [Eoj]
+// for EHD
+struct Ehd {
+  var d1: UInt8
+  var d2: UInt8
+  var hex: [UInt8] {  // [0x10, 0x81]
+    return [d1, d2]
+  }
+  var code: String {  // "1081"
+    let a1 = String(format: "%02x", d1).uppercased()
+    let a2 = String(format: "%02x", d2).uppercased()
+    return a1 + a2
+  }
 }
 
+// for TID (ex. 0001)
+struct Tid {
+  var d1: UInt8       // 0x00
+  var d2: UInt8       // 0x01
+  var hex: [UInt8] {  // [0x00, 0x01]
+    return [d1, d2]
+  }
+  var code: String {  // "0001"
+    let a1 = String(format: "%02x", d1).uppercased()
+    let a2 = String(format: "%02x", d2).uppercased()
+    return a1 + a2
+  }
+  mutating func increment() {
+    var data = UInt16(d1) * 256 + UInt16(d2)
+    if data == 0xFFFF {
+      data = 0
+    } else {
+      data += 1
+    }
+    d1 = UInt8(data / 0x0100)
+    d2 = UInt8(data % 0x0100)
+  }
+}
+
+// for SEOJ and DEOJ
 struct Eoj {
   var d1: UInt8       // 0x02
   var d2: UInt8       // 0x7A
@@ -31,9 +64,19 @@ struct Eoj {
     let a2 = String(format: "%02x", d2).uppercased()
     return a1 + a2
   }
+}
+
+struct DeviceObj {
+  var eoj = Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8())
   var instanceListGet: [UInt8] = [0x80]
   var instanceListSet: [UInt8] = [0x80]
   var instanceListInf: [UInt8] = [0x80]
+}
+
+struct Node {
+  var address: String // "192.169.0.1"
+  var makerCode: String // "000077"
+  var deviceObjs: [DeviceObj]
 }
 
 struct ElMessage {

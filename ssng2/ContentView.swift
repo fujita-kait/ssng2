@@ -56,7 +56,7 @@ struct ContentView: View {
           Spacer()
           Text(controller.myIpList.joined(separator:", ")).font(.headline)
           Text(" ")
-        }.padding()
+        }.padding(.top).padding(.horizontal).padding(.bottom, 5.0)
         HStack {
           // PV-IP
           VStack(spacing: 5) {
@@ -128,7 +128,7 @@ struct ContentView: View {
           Text("Tx: \(controller.udpSentData)")
           Text("Rx: \(controller.address): \(controller.udpData)")
           Text("EPC: \(controller.rxEpc), EDT: \(controller.rxEdt)")
-        }
+        }.environment(\.defaultMinListRowHeight, 0)
       }
     }
   }

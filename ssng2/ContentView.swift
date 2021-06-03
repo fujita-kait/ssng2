@@ -1,7 +1,7 @@
 // ssng2:ContentView.swift
 //
-// Created by Hiro Fujita on 2021/05/07.
-//
+// Created by Hiro Fujita on 2021.06.02
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import SwiftUI
 
@@ -28,7 +28,7 @@ struct ContentView: View {
           }
           Button(action: {
             print("SEARCH")
-            controller.search()
+            controller.send(address: controller.addressList[controller.selectedNode],epc: UInt8(0xD6))
           }) {
             Text("SEARCH").font(.title)
           }
@@ -42,6 +42,8 @@ struct ContentView: View {
             controller.address = ""
             controller.udpData = ""
             controller.udpSentData = ""
+            controller.rxEpc = ""
+            controller.rxEdt = ""
           }) {
             Text("CLEAR").font(.title)
           }

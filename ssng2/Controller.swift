@@ -1,13 +1,12 @@
-//  ssng2:Controller.swift
+// ssng2:Controller.swift
 //
-//  Created by Hiro Fujita on 2021.05.27
-//  Copyright (c) 2021 Hiro Fujita. All rights reserved.
+// Created by Hiro Fujita on 2021.06.02
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
 
 class Controller: ObservableObject {
   let myIpList = getIFAddresses()
-  //  let esvList: [UInt8] = [0x61, 0x62, 0x73]
   @Published var nodes: [Node] = [ EL.defaultNode ]
   @Published var selectedNode: Int = 0 {
     didSet {
@@ -75,10 +74,8 @@ class Controller: ObservableObject {
   }
   var esvCodeList: [String] {
     [String](EL.esv.keys).sorted()
-    //    esvList.map{(a: UInt8) -> String in String(format:"%02X", a)}
   }
   var epcCodeList: [String] {
-    //    print(nodes)
     print("epcCodeList: selectedNode \(selectedNode) selectedEoj \(selectedEoj)")
     var instanceList: [UInt8]
     if esvCodeList[selectedEsv] == "61" { // Set
@@ -99,50 +96,44 @@ class Controller: ObservableObject {
   var sendEl: SendEl!          // for sending data
 
   private var tid = Tid(d1: UInt8(0x00), d2: UInt8(0x00))
-  private var findDevice = (ip: "", tid: UInt8(0x00))     // for findDevice method
+  private var spotDeviceInfo = (address:"", eoj:Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8()))
   
   init() {
     receiveEl = ReceiveEl()
     sendEl = SendEl()
     // Receive Notification "receiveElData" from inSocket, then call a function receiveElData
-    NotificationCenter.default.addObserver(self, selector: #selector(receiveElData(_:)), name: Notification.Name("ReceiveElData"), object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(receive(_:)), name: Notification.Name("ReceiveElData"), object: nil)
+    send(seoj: Eoj(d1: UInt8(0x0E), d2: UInt8(0xF0), d3: UInt8(0x01)), esv: UInt8(0x73),
+         epc: UInt8(0xD5), edt: [0x01, 0x05, 0xFF, 0x01])
   }
   
   /// Notification "receiveElData" を受信すると呼ばれるメソッド
-  @objc func receiveElData(_ notification: Notification) {
-    address = receiveEl.address
-    udpData = receiveEl.udpData
-    let esv = receiveEl.esv
+  @objc func receive(_ notification: Notification) {
+    address  = receiveEl.address
+    udpData  = receiveEl.udpData
+    let esv  = receiveEl.esv
     let seoj = receiveEl.seoj
-    let epc = receiveEl.messages[0].epc
+    let deoj = receiveEl.deoj
+    let epc  = receiveEl.messages[0].epc
+    let edt  = receiveEl.messages[0].edt
     
     switch esv {
-    case 0x60, 0x61:  // SetI or SetC
+    case 0x60, 0x61:  // SetI or SetC: ignore
       break
-    case 0x62:  // Get: reply to 80, 8A and D6
-      switch receiveEl.messages[0].epc {
+    case 0x62:  // Get: respond to 80, 8A and D6
+      switch epc {
       case 0x80:
-        let message = ElMessage(epc: UInt8(0x80), edt: [0x30])
-        sendEl.messages = []
-        sendEl.messages.append(message)
-        sendGetRes()
+        send(deoj: seoj, esv: UInt8(0x72), epc: epc, edt: [0x30])
       case 0x8A:  // maker code
-        let message = ElMessage(epc: UInt8(0x8A), edt: [0x00, 0x00, 0x77])
-        sendEl.messages = []
-        sendEl.messages.append(message)
-        sendGetRes()
+        send(deoj: seoj, esv: UInt8(0x72), epc: epc, edt: [0x00, 0x00, 0x77])
       case 0xD6:  // instance list
         if receiveEl.deoj.hex == [0x0E, 0xF0, 0x01] {  // node only
-          let message = ElMessage(epc: UInt8(0xD6), edt: [0x01, 0x05, 0xFF, 0x01])
-          sendEl.messages = []
-          sendEl.messages.append(message)
-          sendGetRes()
+          send(seoj: deoj, deoj: seoj, esv: UInt8(0x72), epc: UInt8(0xD6), edt: [0x01, 0x05, 0xFF, 0x01])
         }
       default:
-        sendEl.messages = receiveEl.messages
-        sendSNA()
+        send(seoj: deoj, deoj: seoj, esv: UInt8(0x52), epc: epc, edt: edt)
       }
-    case 0x63:  // INF_Req
+    case 0x63:  // INF_Req: ignore
       break
     case 0x72, 0x73:  // Get_Res(0x72) or INF(0x73)
       print("case 0x72 0x73")
@@ -163,7 +154,6 @@ class Controller: ObservableObject {
           return
         }
         let instanceList = receiveEl.messages[0].edt
-        //        print("instanceList: \(instanceList)")
         var node = Node(address: address, makerCode: "", deviceObjs: [])
         for i in 0...(Int(instanceList[0])-1) {
           node.deviceObjs.append(DeviceObj(eoj: Eoj(d1: instanceList[3*i+1], d2: instanceList[3*i+2], d3: instanceList[3*i+3])))
@@ -173,11 +163,11 @@ class Controller: ObservableObject {
         idPvNode = UUID()  // update PV IP
         idPvEoj = UUID()   // update PV DEOJ
 
-        elGet(address: address, epc: 0x8A)  // Get maker code
+        send(address: address, epc: 0x8A)  // Get maker code
         for a in node.deviceObjs {          // Get property map
-          elGet(address: address, deoj:a.eoj, epc: 0x9D)
-          elGet(address: address, deoj:a.eoj, epc: 0x9E)
-          elGet(address: address, deoj:a.eoj, epc: 0x9F)
+          send(address: address, deoj:a.eoj, epc: 0x9D)
+          send(address: address, deoj:a.eoj, epc: 0x9E)
+          send(address: address, deoj:a.eoj, epc: 0x9F)
         }
         
       // Maker Code: append Maker Code to a node
@@ -212,25 +202,24 @@ class Controller: ObservableObject {
           }
         }
         
-      case UInt8(0x80):   // for method "findDevice"
-        if findDevice.ip != "" {
-          if receiveEl.address == findDevice.ip {
-            findDeviceSendSet(ipAddress: receiveEl.address, getRes: receiveEl.messages[0].edt[0])
-          }
+      case UInt8(0x80):   // for method "spot"
+        if ((address == spotDeviceInfo.address) && (seoj.code == spotDeviceInfo.eoj.code)) {
+          let edt = receiveEl.messages[0].edt[0]
+          let data = (edt == UInt8(0x30)) ? UInt8(0x31) : UInt8(0x30)
+          send(address: address, deoj:seoj, esv:UInt8(0x61), epc:UInt8(0x80), edt:[data])
+          spotDeviceInfo.address = ""
+          spotDeviceInfo.eoj = Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8())
         }
-        findDevice.ip = ""
       default: break
       }
     case 0x74:  // INFC
       break
     case 0x6E:  // SetGet -> send SetGet_SNA
-      sendEl.messages = []
-      sendSNA()
+      send(seoj: deoj, deoj: seoj, esv: UInt8(0x5E), epc: epc, edt: edt)
       print("Obj:ESV=0x5E:SetGet_SNA, send SNA: \(sendEl.esv)")
     default:
       print("Obj:ESV error \(esv)")
     }
-//    print("Controller nodes:\(nodes)")
   }
   
   func propertyName(classCode: String, epc: UInt8) -> String {
@@ -247,97 +236,27 @@ class Controller: ObservableObject {
   func decodeEdt(classCode: String, epc: UInt8, edt: [UInt8]) -> String {
     return ""
   }
-  
-  /// Send data based on PV
-  func send(address: String, deoj:Eoj, esv:UInt8, epc:UInt8, edt:[UInt8]) {
-    var message = ElMessage(epc: epc, edt: [])
-//    var message = ElMessage(epc: UInt8(0x00), edt: [])
-//    message.epc = epc
-//    message.edt = []
+
+  /// Send ECHONET Lite message (OPC: 1)
+  /// default value of argument: IP:224.0.23.0, SEOJ:05FF01, DEOJ:0EF001, ESV:62, EPC:80, EDT:none
+  func send(address: String  = EL.mcAddress,
+              seoj: Eoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01),
+              deoj: Eoj = Eoj(d1: 0x0E, d2: 0xF0, d3: 0x01),
+              esv: UInt8 = UInt8(0x62),
+              epc: UInt8 = UInt8(0x80),
+              edt: [UInt8] = []) {
     sendEl.tid = tid
-    sendEl.seoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01)    // controller
+    sendEl.seoj = seoj    // controller
     sendEl.deoj = deoj
     sendEl.esv  = esv
-    // Set EDT data in case of SETC(0x60) or SETI(0x61)
-    if (esv == UInt8(0x60)) || (esv == UInt8(0x61)) {
-      message.edt = edt
+    sendEl.messages = [ElMessage(epc: epc, edt: edt)]
+    if esv == UInt8(0x62) {
+      sendEl.messages[0].edt = []
     }
-    sendEl.messages = [message]
     if (!sendEl.send(address: address)) {
       print("Send failed")
     }
     udpSentData = sendEl.udpData
-    tid.increment()
-  }
-  
-  func sendGetRes() {
-    sendEl.tid = receiveEl.tid
-    sendEl.seoj = receiveEl.deoj
-    sendEl.deoj = receiveEl.seoj
-    sendEl.esv  = 0x72
-    if (!sendEl.send(address: receiveEl.address)) {
-      print("Send failed")
-    }
-    print("Obj:sendGetRes")
-  }
-  
-  func sendSNA() {
-    sendEl.tid = receiveEl.tid
-    sendEl.seoj = receiveEl.deoj
-    sendEl.deoj = receiveEl.seoj
-    switch receiveEl.esv {
-    case 0x60:  // SetI
-      sendEl.esv = 0x50   // SetI_SNA
-    case 0x61:  // SetC
-      sendEl.esv = 0x51   // SetC_SNA
-    case 0x62:  // Get
-      sendEl.esv = 0x52   // GET_SNA
-    case 0x63:  // INF_Req
-      sendEl.esv = 0x53   // INF_SNA
-    case 0x6E:  // SetGet
-      sendEl.esv = 0x5E   // SetGet_SNA
-    default:
-      return
-    }
-    if (!sendEl.send(address: receiveEl.address)) {
-      print("Send failed")
-    }
-    print("Controller:sendSNA: \(sendEl.esv)")
-  }
-  
-  /// Send ECHONET Lite Get message
-  func elGet(address: String = EL.mcAddress, deoj: Eoj = Eoj(d1: 0x0E, d2: 0xF0, d3: 0x01), epc: UInt8) {
-    let message = ElMessage(epc: UInt8(epc), edt: [])
-    sendEl.tid = tid
-    sendEl.seoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01)  // controller
-    sendEl.deoj = deoj                               // node
-    sendEl.esv  = 0x62                               // Get
-    sendEl.messages = [message]
-    if (!sendEl.send(address: address)) {
-      print("Send failed")
-    }
-    udpSentData = sendEl.udpData
-    tid.increment()
-  }
-  
-  func search() {
-    elGet(epc: 0xD6)
-  }
-    
-  /// Send INF(DEOJ:node, EPC:D5) to Multicast Address
-  func infD5() {
-    var message = ElMessage(epc: UInt8(0x00), edt: [])
-    // create message
-    message.epc = 0xD5                               // instance list
-    message.edt = [0x01, 0x05, 0xFF, 0x01]
-    sendEl.tid = tid
-    sendEl.seoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01)  // controller
-    sendEl.deoj = Eoj(d1: 0x0E, d2: 0xF0, d3: 0x01)  // node
-    sendEl.esv  = 0x73                  // INF
-    sendEl.messages = [message]
-    if (!sendEl.send(address: EL.mcAddress)) {
-      print("Send failed to 224.0.23.0")
-    }
     tid.increment()
   }
     
@@ -368,62 +287,12 @@ class Controller: ObservableObject {
     return propertyArray
   }
   
+  /// A function called when "SPOT" button is clicked
   func spot() {
+    spotDeviceInfo.address = addressList[selectedNode]
+    spotDeviceInfo.eoj = nodes[selectedNode].deviceObjs[selectedEoj].eoj
+    send(address: addressList[selectedNode], deoj: spotDeviceInfo.eoj)
     print("SPOT")
-  }
-  
-  /// In order to find a device with given IP address, turn the ON/OFF status
-  func findDevice(ipAddress: String) {    // 2016.06.10
-    // Set findDevice property for processing GET_RES
-//    findDevice = (ipAddress, tid)
-    print("Controller:findDevice: findDevice = \(findDevice)")
-    
-    // Send "GET EPC=0x80"
-    var message = ElMessage(epc: UInt8(0x00), edt: [])
-    message.epc = 0x80                  // ON/OFF status
-    sendEl.tid = tid
-    sendEl.seoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01)  // controller
-    //    for node in nodeList {
-    //      if node.ip == ipAddress {
-    //        let deoj = node.devices[0]
-    //        let d0 : UInt8
-    //        let d1 : UInt8
-    //        (d0, d1) = uint16ToUInt8(a: deoj.elClass)
-    //        sendEl.deoj = [d0, d1, deoj.elInstance]    // node
-    //      }
-    //    }
-    
-    sendEl.esv  = 0x62                  // Get
-    sendEl.messages = [message]
-    if (!sendEl.send(address: ipAddress)) {
-      print("Send failed")
-    }
-    tid.increment()
-    
-    // GET_RESの処理は xxx
-  }
-  
-  func findDeviceSendSet(ipAddress: String, getRes: UInt8) {
-    // Send "SET EPC=0x80"
-    let edtData = (getRes == UInt8(0x30)) ? UInt8(0x31) : UInt8(0x30)
-    var message = ElMessage(epc: UInt8(0x00), edt: [edtData])
-    message.epc = 0x80                  // ON/OFF status
-    sendEl.tid = tid
-    sendEl.seoj = Eoj(d1: 0x05, d2: 0xFF, d3: 0x01)  // controller
-    //    for node in nodeList {
-    //      if node.ip == ipAddress {
-    //        let deoj = node.devices[0]
-    //        let d0 : UInt8
-    //        let d1 : UInt8
-    //        (d0, d1) = uint16ToUInt8(a: deoj.elClass)
-    //        sendEl.deoj = [d0, d1, deoj.elInstance]    // node
-    //      }
-    //    }
-    sendEl.esv  = 0x61                  // SetC
-    sendEl.messages = [message]
-    if (!sendEl.send(address: ipAddress)) {
-      print("Send failed")
-    }
-    tid.increment()
-  }
+  } 
+
 }

@@ -1,7 +1,7 @@
-//  ssng2:Const.swift
+// ssng2:Const.swift
 //
-//  Created by Hiro Fujita on 2021.05.25
-//  Copyright (c) 2021 Hiro Fujita. All rights reserved.
+// Created by Hiro Fujita on 2021.06.02
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
 

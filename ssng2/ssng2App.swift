@@ -1,9 +1,7 @@
+// ssng2App.swift
 //
-//  ssng2App.swift
-//  ssng2
-//
-//  Created by Hiro Fujita on 2021/05/07.
-//
+// Created by Hiro Fujita on 2021.06.02
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import SwiftUI
 

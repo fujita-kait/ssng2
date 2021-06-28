@@ -7,7 +7,7 @@ import Foundation
 import CocoaAsyncSocket
 
 class OutSocket: NSObject, GCDAsyncUdpSocketDelegate {
-    var socket:GCDAsyncUdpSocket!
+  var socket:GCDAsyncUdpSocket!
   let portEL = UInt16(EL.portEL)
     
     override init(){
@@ -16,8 +16,9 @@ class OutSocket: NSObject, GCDAsyncUdpSocketDelegate {
     }
 
     func setupConnection(){
-        print("OutSocket:setupConnection")
-        socket = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
+      socket = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
+      print("OutSocket:setupConnection!", socket ?? "socket is null"
+      )
     }
 
     func setupConnection(_ address:String){

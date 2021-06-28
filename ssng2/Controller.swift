@@ -86,11 +86,18 @@ class Controller: ObservableObject {
     return instanceList.map{(a: UInt8) -> String in String(format:"%02X", a)}
   }
   
-  @Published var udpSentData = String() // View Tx: sent UDP data in HEX string
-  @Published var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
-  @Published var udpData = String()     // View Rx data: received UDP data in HEX string
-  @Published var rxEpc = String()       // View Rx epc
-  @Published var rxEdt = String()       // View Rx edt
+  @Published var txContents = String()  // View Tx: sent UDP data in HEX string
+  @Published var rxContents = String()  // View Rx: sent UDP data in HEX string
+  @Published var rxSubContents = String()  // View Rx: EPC and EDT
+
+  var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
+  var udpData = String()     // View Rx data: received UDP data in HEX string
+
+//  @Published var udpSentData = String() // View Tx: sent UDP data in HEX string
+//  @Published var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
+//  @Published var udpData = String()     // View Rx data: received UDP data in HEX string
+//  @Published var rxEpc = String()       // View Rx epc
+//  @Published var rxEdt = String()       // View Rx edt
   
   var receiveEl: ReceiveEl!    // for receiving data
   var sendEl: SendEl!          // for sending data
@@ -103,6 +110,7 @@ class Controller: ObservableObject {
     sendEl = SendEl()
     // Receive Notification "receiveElData" from inSocket, then call a function receiveElData
     NotificationCenter.default.addObserver(self, selector: #selector(receive(_:)), name: Notification.Name("ReceiveElData"), object: nil)
+    // Boot process: INF D5
     send(seoj: Eoj(d1: UInt8(0x0E), d2: UInt8(0xF0), d3: UInt8(0x01)), esv: UInt8(0x73),
          epc: UInt8(0xD5), edt: [0x01, 0x05, 0xFF, 0x01])
   }
@@ -111,6 +119,7 @@ class Controller: ObservableObject {
   @objc func receive(_ notification: Notification) {
     address  = receiveEl.address
     udpData  = receiveEl.udpData
+    rxContents = address + ": " + udpData
     let esv  = receiveEl.esv
     let seoj = receiveEl.seoj
     let deoj = receiveEl.deoj
@@ -137,9 +146,10 @@ class Controller: ObservableObject {
       break
     case 0x72, 0x73:  // Get_Res(0x72) or INF(0x73)
       print("case 0x72 0x73")
-      rxEpc = String(format:"%02X", receiveEl.messages[0].epc) + propertyName(classCode: seoj.classCode, epc: epc)
-      rxEdt = String(receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()) +
+      let rxEpc = String(format:"%02X", receiveEl.messages[0].epc) + " " + propertyName(classCode: seoj.classCode, epc: epc)
+      let rxEdt = String(receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()) +
         decodeEdt(classCode: seoj.classCode, epc: epc, edt: receiveEl.messages[0].edt)
+      rxSubContents = "EPC:\(rxEpc) EDT:\(rxEdt)"
 
       switch epc {
       // Instance ListS: append a node to nodes
@@ -256,7 +266,8 @@ class Controller: ObservableObject {
     if (!sendEl.send(address: address)) {
       print("Send failed")
     }
-    udpSentData = sendEl.udpData
+    txContents = sendEl.udpData
+//    udpSentData = sendEl.udpData
     tid.increment()
   }
     

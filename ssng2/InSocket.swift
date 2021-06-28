@@ -19,16 +19,15 @@ class InSocket: NSObject, GCDAsyncUdpSocketDelegate {
   private var socket:GCDAsyncUdpSocket!
   private let multicastAddress = EL.mcAddress  // multicast address for ECHONET Lite
   private let portEL = UInt16(EL.portEL)       // port number for ECHONET Lite
-  
+
   override init(){
     super.init()
     setupConnection()
   }
   
   func setupConnection(){
-    print("InSocket:setupConnection")
     socket = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
-    
+    print("InSocket:setupConnection", socket ?? "socket is null")
     do {
       try socket.bind(toPort: portEL)
     } catch { print("InSocket:socket.bindToPort:error", error)            // error handling

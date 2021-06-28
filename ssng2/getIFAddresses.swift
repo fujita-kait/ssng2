@@ -28,7 +28,10 @@ func getIFAddresses() -> [String] {
           var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
           if (getnameinfo(&addr!, socklen_t((addr?.sa_len)!), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST) == 0) {
             if let address = String(validatingUTF8: hostname) {
-              addresses.append(address)
+              // ignore link local address (169.254.xxx.xxx)
+              if !address.hasPrefix("169.254") {
+                addresses.append(address)
+              }
             }
           }
         }

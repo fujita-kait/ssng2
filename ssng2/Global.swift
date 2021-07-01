@@ -68,9 +68,9 @@ struct Eoj {
 
 struct DeviceObj {
   var eoj = Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8())
-  var instanceListGet: [UInt8] = [0x80]
-  var instanceListSet: [UInt8] = [0x80]
-  var instanceListInf: [UInt8] = [0x80]
+  var propertyListGet: [UInt8] = [0x80]
+  var propertyListSet: [UInt8] = [0x80]
+  var propertyListInf: [UInt8] = [0x80]
 }
 
 struct Node {
@@ -92,7 +92,7 @@ struct ElDevObj {
 
 struct ElProp {
   var name: String = ""  // Property Name
-  var size: Int = 0      // Data Size
+  var size: Int = 0      // Data Size (0 is unknown size)
   var type: Type = .raw  // Data type
   var multiple: Float = 1.0
   var state: [String:String]? = nil

@@ -8,6 +8,7 @@ import Foundation
 struct EL {
   static let mcAddress = "224.0.23.0"
   static let portEL = 3610
+//  static let portEL = 3611
   static let ehd = Ehd(d1: 0x10, d2: 0x81)
   static let defaultNode = Node(
     address:"224.0.23.0",makerCode:"000077",
@@ -229,9 +230,9 @@ struct EL {
                       "D7":ElProp(name:"積算電力量有効桁数",size:1,type:.number),
                       "E0":ElProp(name:"積算電力量計測値:正方向",size:4,type:.number),
                       "E1":ElProp(name:"積算電力量単位",size:1,type:.number),
-                      "E2":ElProp(name:"積算電力量計測値履歴１:正方向",size:194,type:.number),
+                      "E2":ElProp(name:"積算電力量計測値履歴１:正方向",size:194,type:.raw),
                       "E3":ElProp(name:"積算電力量計測値:逆方向",size:4,type:.number),
-                      "E4":ElProp(name:"積算電力量計測値履歴１:逆方向",size:194,type:.number),
+                      "E4":ElProp(name:"積算電力量計測値履歴１:逆方向",size:194,type:.raw),
                       "E5":ElProp(name:"積算履歴収集日１",size:1,type:.state,state:["00":"当日","01":"1日前","02":"2日前","03":"3日前","04":"4日前","05":"5日前","06":"6日前","07":"7日前","63":"99日前"]),
                       "E7":ElProp(name:"瞬時電力計測値",size:4,type:.number),
                       "E8":ElProp(name:"瞬時電流計測値",size:4,type:.number),
@@ -243,7 +244,7 @@ struct EL {
                       "B0":ElProp(name:"照度レベル",size:1,type:.number),
                       "B6":ElProp(name:"点灯モード",size:1,type:.state,state:["41":"自動","42":"通常灯","43":"常夜灯","45":"カラー灯"]),
                       "B7":ElProp(name:"通常灯照度レベル",size:1,type:.number),
-                      "C0":ElProp(name:"RGB設定",size:3,state:["000000":"Black","FF0000":"Red","00FF00":"Green","0000FF":"Blue","FFFF00":"Yellow","FF00FF":"Mazenta","00FFFF":"Cyan","FFFFFF":"White"])
+                      "C0":ElProp(name:"RGB設定",size:3,type:.raw)
                     ]),
     "0291":ElDevObj(name:"単機能照明",
                     props:["B0":ElProp(name:"照度レベル",size:1,type:.number)]),
@@ -258,7 +259,7 @@ struct EL {
                       "B6":ElProp(name:"切替室ドア開閉状態",size:1,type:.state,state:["41":"開:OPEN","42":"閉:CLOSE"])
                     ]),
     "05FF":ElDevObj(name:"コントローラ",
-                    props:["C0":ElProp(name:"コントローラID",size:40,type:.number)])
+                    props:["C0":ElProp(name:"コントローラID",size:40,type:.raw)])
   ]
 
   // Super Class
@@ -267,27 +268,27 @@ struct EL {
     "81":ElProp(name:"設置場所",size:1,type:.state,
                     state:["00":"未設定","08":"リビング","10":"ダイニング","18":"キッチン","20":"浴室","28":"トイレ","30":"洗面所","38":"廊下","40":"部屋","48":"階段","50":"玄関","58":"納戸","60":"庭","68":"車庫","70":"ベランダ","78":"その他","FF":"不定"]),
     "82":ElProp(name:"規格Version",size:4,type:.state,state:["00004200":"B","00004300":"C","00004400":"D","00004500":"E","00004600":"F","00004700":"G","00004800":"H","00004900":"I","00004A00":"J","00004B00":"K","00004C00":"L","00004D00":"M","00004E00":"N","00005000":"P","00005100":"Q"]),
-    "83":ElProp(name:"識別番号",size:17,type:.number),
+    "83":ElProp(name:"識別番号",size:17,type:.raw),
     "84":ElProp(name:"瞬時消費電力計測値",size:2,type:.number),
     "85":ElProp(name:"積算消費電力計測値",size:4,type:.number),
-    "86":ElProp(name:"メーカー異常コード",size:225,type:.number),
+    "86":ElProp(name:"メーカー異常コード",size:225,type:.raw),
     "87":ElProp(name:"電流制限設定",size:1,type:.number),
     "88":ElProp(name:"異常発生状態",size:1,type:.state,state:["41":"異常あり","42":"異常無し"]),
-    "89":ElProp(name:"異常内容",size:2,type:.number),
+    "89":ElProp(name:"異常内容",size:2,type:.raw),
     "8A":ElProp(name:"メーカコード",size:3,type:.state,state:makerCode),
-    "8B":ElProp(name:"事業場コード",size:3,type:.number),
-    "8C":ElProp(name:"商品コード",size:12,type:.number),
-    "8D":ElProp(name:"製造番号",size:12,type:.number),
-    "8E":ElProp(name:"製造年月日",size:4,type:.number),
+    "8B":ElProp(name:"事業場コード",size:3,type:.raw),
+    "8C":ElProp(name:"商品コード",size:12,type:.raw),
+    "8D":ElProp(name:"製造番号",size:12,type:.raw),
+    "8E":ElProp(name:"製造年月日",size:4,type:.raw),
     "8F":ElProp(name:"節電動作",size:1,type:.state,state:["41":"節電","42":"通常"]),
     "93":ElProp(name:"遠隔操作設定",size:1,type:.state,state:["41":"公衆回線未経由","42":"公衆回線経由"]),
-    "97":ElProp(name:"現在時刻設定",size:2,type:.number),
-    "98":ElProp(name:"現在年月日設定",size:4,type:.number),
+    "97":ElProp(name:"現在時刻設定",size:2,type:.raw),
+    "98":ElProp(name:"現在年月日設定",size:4,type:.raw),
     "99":ElProp(name:"電力制限設定",size:2,type:.number),
-    "9A":ElProp(name:"積算運転時間",size:5,type:.number),
-    "9D":ElProp(name:"状変アナウンス",size:17,type:.number),
-    "9E":ElProp(name:"Setプロパティ",size:17,type:.number),
-    "9F":ElProp(name:"Getプロパティ",size:17,type:.number)
+    "9A":ElProp(name:"積算運転時間",size:5,type:.raw),
+    "9D":ElProp(name:"状変アナウンス",size:17,type:.raw),
+    "9E":ElProp(name:"Setプロパティ",size:17,type:.raw),
+    "9F":ElProp(name:"Getプロパティ",size:17,type:.raw)
   ]
 
   // Node Profile
@@ -297,9 +298,9 @@ struct EL {
     "88":ElProp(name:"異常発生状態",size:1,type:.state,state:["41":"異常あり","42":"異常無し"]),
     "D3":ElProp(name:"Instance 数",size:3,type:.number),
     "D4":ElProp(name:"Class 数",size:2,type:.number),
-    "D5":ElProp(name:"Instance List",size:253,type:.number),
-    "D6":ElProp(name:"Instance ListS",size:253,type:.number),
-    "D7":ElProp(name:"Class ListS",size:17,type:.number)
+    "D5":ElProp(name:"Instance List",size:253,type:.raw),
+    "D6":ElProp(name:"Instance ListS",size:253,type:.raw),
+    "D7":ElProp(name:"Class ListS",size:17,type:.raw)
   ]
 
 }

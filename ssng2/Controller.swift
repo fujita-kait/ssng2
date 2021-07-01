@@ -69,23 +69,96 @@ class Controller: ObservableObject {
   var addressList: [String] {
     nodes.map{(node) in node.address }
   }
+
   var eojCodeList: [String] {
     nodes[selectedNode].deviceObjs.map{(a) in a.eoj.code }
   }
+
   var esvCodeList: [String] {
     [String](EL.esv.keys).sorted()
   }
+
   var epcCodeList: [String] {
     print("epcCodeList: selectedNode \(selectedNode) selectedEoj \(selectedEoj)")
-    var instanceList: [UInt8]
+    var epcList: [UInt8]
     if esvCodeList[selectedEsv] == "61" { // Set
-      instanceList = nodes[selectedNode].deviceObjs[selectedEoj].instanceListSet
+      epcList = nodes[selectedNode].deviceObjs[selectedEoj].propertyListSet
     } else { // Get or Inf
-      instanceList = nodes[selectedNode].deviceObjs[selectedEoj].instanceListGet
+      epcList = nodes[selectedNode].deviceObjs[selectedEoj].propertyListGet
     }
-    return instanceList.map{(a: UInt8) -> String in String(format:"%02X", a)}
+    return epcList.map{(a: UInt8) -> String in String(format:"%02X", a)}
+  }
+
+  var elProp: ElProp {
+    var tmp = EL.deviceDescriptions[selectedEojCode2bytes]?.props[selectedEpcCode]
+    if tmp == nil {
+      tmp = EL.superClass[selectedEpcCode]
+    }
+    return tmp ?? ElProp()
+  }
+
+  var edtDataType: Type {
+    elProp.type
+  }
+
+  var edtCodeList: [String] {
+//    var elProp = EL.deviceDescriptions[selectedEojCode2bytes]?.props[selectedEpcCode]
+//    if elProp == nil {
+//      elProp = EL.superClass[selectedEpcCode]
+//    }
+//    print("edtCodeList: selectedEojCode2bytes \(selectedEojCode2bytes) selectedEpcCode \(selectedEpcCode) elProp \(String(describing: elProp))")
+//    if elProp.type == .state {
+    if edtDataType == .state {
+      return elProp.state?.keys.map{$0}.sorted() ?? []
+    } else {
+      return []
+    }
   }
   
+  var edtNumberNote: String {
+    if elProp.multiple != 1.0 {
+      return "X \(elProp.multiple)"
+    } else {
+      return ""
+    }
+  }
+  
+  // for footer of Picker View
+  var footerPvIp: String {
+    let makerCode = nodes[selectedNode].makerCode
+    return EL.makerCode[makerCode] ?? "unknown"
+  }
+  var footerPvEoj: String {
+    let eojCode = eojCodeList[selectedEoj]
+    let to = eojCode.index(eojCode.startIndex, offsetBy:4)
+    let eojCode2bytes = String(eojCode[..<to])
+    return EL.deviceDescriptions[eojCode2bytes]?.name ?? "unknown"
+  }
+  var footerPvEsv: String {
+    EL.esv[esvCodeList[selectedEsv]] ?? "unknown"
+  }
+  var selectedEojCode2bytes: String {
+    let eojCode = eojCodeList[selectedEoj]
+    let to = eojCode.index(eojCode.startIndex, offsetBy:4)
+    return String(eojCode[..<to])
+  }
+  var selectedEpcCode: String {
+    epcCodeList[selectedEpc]
+  }
+  var footerPvEpc: String {
+    return propertyName(classCode: selectedEojCode2bytes, epc: UInt8(selectedEpcCode, radix:16)!)
+  }
+  var selectedEdtCode: String {
+    edtCodeList[selectedEdt]
+  }
+  var footerPvEdt: String {
+    var elProp = EL.deviceDescriptions[selectedEojCode2bytes]?.props[selectedEpcCode]
+    if elProp == nil {
+      elProp = EL.superClass[selectedEpcCode]
+    }
+    return elProp?.state?[selectedEdtCode] ?? ""
+  }
+
   @Published var txContents = String()  // View Tx: sent UDP data in HEX string
   @Published var rxContents = String()  // View Rx: sent UDP data in HEX string
   @Published var rxSubContents = String()  // View Rx: EPC and EDT
@@ -201,11 +274,11 @@ class Controller: ObservableObject {
             for (idx, a) in nodes[index].deviceObjs.enumerated() {
               if a.eoj.hex == seoj.hex {
                 if epc == 0x9D {
-                  nodes[index].deviceObjs[idx].instanceListInf = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  nodes[index].deviceObjs[idx].propertyListInf = decodePropertyMap(edt: receiveEl.messages[0].edt)
                 } else if epc == 0x9E {
-                  nodes[index].deviceObjs[idx].instanceListSet = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  nodes[index].deviceObjs[idx].propertyListSet = decodePropertyMap(edt: receiveEl.messages[0].edt)
                 } else { // epc == 0x9F
-                  nodes[index].deviceObjs[idx].instanceListGet = decodePropertyMap(edt: receiveEl.messages[0].edt)
+                  nodes[index].deviceObjs[idx].propertyListGet = decodePropertyMap(edt: receiveEl.messages[0].edt)
                 }
               }
             }
@@ -244,7 +317,15 @@ class Controller: ObservableObject {
   }
   
   func decodeEdt(classCode: String, epc: UInt8, edt: [UInt8]) -> String {
-    return ""
+    var elProp = EL.deviceDescriptions[classCode]?.props[String(format:"%02X", epc)]
+    if elProp == nil {
+      elProp = EL.superClass[String(format:"%02X", epc)]
+    }
+    if elProp == nil {
+      return ""
+    } else {
+      return " \(elProp?.state?[String(format:"%02X", edt[0])] ?? "")" 
+    }
   }
 
   /// Send ECHONET Lite message (OPC: 1)

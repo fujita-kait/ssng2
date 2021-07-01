@@ -47,10 +47,6 @@ struct ContentView: View {
             controller.txContents = ""
             controller.rxContents = ""
             controller.rxSubContents = ""
-
-//            controller.udpSentData = ""
-//            controller.rxEpc = ""
-//            controller.rxEdt = ""
           }) {
             Text("CLEAR").font(.title2)
           }
@@ -71,14 +67,14 @@ struct ContentView: View {
             Text("IP").font(.headline)
             Picker(selection: $controller.selectedNode, label: Text("")){
               ForEach(0 ..< controller.addressList.count){ index in
-                Text(controller.addressList[index]).font(.title2)
+                Text(controller.addressList[index]).font(/*@START_MENU_TOKEN@*/.title3/*@END_MENU_TOKEN@*/)
               }
             }
             .id(controller.idPvNode)
-            .labelsHidden().frame(width: geometry.size.width * (2/8), height: 100).clipped()
-            let makerCode = controller.nodes[controller.selectedNode].makerCode
-            Text("\(EL.makerCode[makerCode] ?? "unknown")").font(.callout)
-          }
+            .labelsHidden().frame(width: geometry.size.width * (4/20), height: 100).clipped()
+            Text("\(controller.footerPvIp)").font(.callout)
+          }.frame(width: geometry.size.width * (4/20))
+          
           
           // PV-EOJ
           VStack(spacing: 0.0) {
@@ -89,12 +85,9 @@ struct ContentView: View {
               }
             }
             .id(controller.idPvEoj)
-            .labelsHidden().frame(width: geometry.size.width * (2/8), height: 100).clipped()
-            let eojCode = controller.eojCodeList[controller.selectedEoj]
-            let to = eojCode.index(eojCode.startIndex, offsetBy:4)
-            let eojCode2bytes = String(eojCode[..<to])
-            Text(" \(EL.deviceDescriptions[eojCode2bytes]?.name ?? "unknown")").font(.callout)
-          }
+            .labelsHidden().frame(width: geometry.size.width * (3/20), height: 100).clipped()
+            Text("\(controller.footerPvEoj)").font(.callout)
+          }.frame(width: geometry.size.width * (3/20))
           
           // PV-ESV
           VStack(spacing: 0.0) {
@@ -105,9 +98,9 @@ struct ContentView: View {
               }
             }
             .id(controller.idPvEsv)
-            .labelsHidden().frame(width: geometry.size.width * (1/8), height: 100).clipped()
-            Text(" \(EL.esv[controller.esvCodeList[controller.selectedEsv]]!)").font(.callout)
-          }
+            .labelsHidden().frame(width: geometry.size.width * (2/20), height: 100).clipped()
+            Text("\(controller.footerPvEsv)").font(.callout)
+          }.frame(width: geometry.size.width * (2/20))
           
           // PV-EPC
           VStack(spacing: 0.0) {
@@ -118,40 +111,84 @@ struct ContentView: View {
               }
             }
             .id(controller.idPvEpc)
-            .labelsHidden().frame(width: geometry.size.width * (1/8), height: 100).clipped()
-            let eojCode = controller.eojCodeList[controller.selectedEoj]
-            let to = eojCode.index(eojCode.startIndex, offsetBy:4)
-            let eojCode2bytes = String(eojCode[..<to])
-            let epc = UInt8(controller.epcCodeList[controller.selectedEpc], radix:16)!
-            Text("\(controller.propertyName(classCode: eojCode2bytes, epc: epc))").font(.callout)
-//            Text("Sel: \(controller.selectedEpc)").font(.callout)
-          }
+            .labelsHidden().frame(width: geometry.size.width * (6/20), height: 100).clipped()
+            Text("\(controller.footerPvEpc)").font(.callout)
+          }.frame(width: geometry.size.width * (6/20))
 
           // View-EDT
           VStack(spacing: 0.0) {
-            Text("EDT").font(.headline)
-            TextField("Input Data", text: $edtInputValue,
-              onEditingChanged: { begin in
-                  if begin {
-                      self.flagEditting = true
-                      self.edtValue = ""
-                  } else {
-                      self.flagEditting = false
+            // No View when ESV is "62"
+            if !(controller.esvCodeList[controller.selectedEsv] == "62") {
+              Text("EDT").font(.headline)
+              if controller.edtDataType == .state {
+                Picker(selection: $controller.selectedEdt, label: Text("Label")) {
+                  ForEach(0 ..< controller.edtCodeList.count){ index in
+                    Text(controller.edtCodeList[index]).font(.title2)
                   }
-              },
-              /// リターンキーが押された時の処理
-              onCommit: {
-                  self.edtValue = "\(self.edtInputValue)"
-                  self.edtInputValue = ""
-              })
-              .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
-              .padding()
-              // 編集フラグがONの時に枠に影を付ける
-              .shadow(color: flagEditting ? .blue : .clear, radius: 3)
-            .id(controller.idPvEdt)
-            .labelsHidden().frame(width: geometry.size.width * (2/8), height: 100).clipped()
-            Text("\(edtValue): ON").font(.callout)
-          }
+                }
+                .id(controller.idPvEdt)
+                .labelsHidden().frame(width: geometry.size.width * (5/20), height: 100).clipped()
+                Text("\(controller.footerPvEdt)").font(.callout)
+              } else if controller.edtDataType == .number {
+                Spacer()
+                Text("10進数で値を入力").font(.callout)
+                TextField("28", text: $edtInputValue,
+                  onEditingChanged: { begin in
+                      if begin {
+                          self.flagEditting = true
+                          self.edtValue = ""
+                      } else {
+                          self.flagEditting = false
+                      }
+                  },
+                  /// リターンキーが押された時の処理
+                  onCommit: {
+                      self.edtValue = "\(self.edtInputValue)"
+                  })
+                  .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
+                  .padding()
+                  // 編集フラグがONの時に枠に影を付ける
+                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
+                .id(controller.idPvEdt)
+                .labelsHidden().frame(width: geometry.size.width * (5/20)).clipped()
+                Text(controller.edtNumberNote).font(.callout)
+                Spacer()
+                Text("").font(.callout)
+              } else {  // data type is raw
+                Spacer()
+                if controller.elProp.size == 0 {
+                  Text("16進数で値を入力").font(.callout)
+                } else {
+                  Text("16進数で\(controller.elProp.size)バイトの値を入力").font(.callout)
+                }
+                TextField("FFFF", text: $edtInputValue,
+                  onEditingChanged: { begin in
+                      if begin {
+                          self.flagEditting = true
+                          self.edtValue = ""
+                      } else {
+                          self.flagEditting = false
+                      }
+                  },
+                  /// リターンキーが押された時の処理
+                  onCommit: {
+                      self.edtValue = "\(self.edtInputValue)"
+                  })
+                  .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
+                  .padding()
+                  // 編集フラグがONの時に枠に影を付ける
+                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
+                .id(controller.idPvEdt)
+                .labelsHidden().frame(width: geometry.size.width * (5/20)).clipped()
+                Text("").font(.callout)
+                Spacer()
+                Text("").font(.callout)              }
+            } else {
+              Text("").font(.headline)
+              Spacer().frame(height: 100)
+              Text("").font(.callout)
+            }
+          }.frame(width: geometry.size.width * (5/20))
         }
         .border(/*@START_MENU_TOKEN@*/Color.black/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
         

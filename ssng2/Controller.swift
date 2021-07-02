@@ -102,12 +102,6 @@ class Controller: ObservableObject {
   }
 
   var edtCodeList: [String] {
-//    var elProp = EL.deviceDescriptions[selectedEojCode2bytes]?.props[selectedEpcCode]
-//    if elProp == nil {
-//      elProp = EL.superClass[selectedEpcCode]
-//    }
-//    print("edtCodeList: selectedEojCode2bytes \(selectedEojCode2bytes) selectedEpcCode \(selectedEpcCode) elProp \(String(describing: elProp))")
-//    if elProp.type == .state {
     if edtDataType == .state {
       return elProp.state?.keys.map{$0}.sorted() ?? []
     } else {
@@ -158,6 +152,7 @@ class Controller: ObservableObject {
     }
     return elProp?.state?[selectedEdtCode] ?? ""
   }
+  var edtValueFromTextField = ""
 
   @Published var txContents = String()  // View Tx: sent UDP data in HEX string
   @Published var rxContents = String()  // View Rx: sent UDP data in HEX string
@@ -166,7 +161,6 @@ class Controller: ObservableObject {
   var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
   var udpData = String()     // View Rx data: received UDP data in HEX string
 
-//  @Published var udpSentData = String() // View Tx: sent UDP data in HEX string
 //  @Published var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
 //  @Published var udpData = String()     // View Rx data: received UDP data in HEX string
 //  @Published var rxEpc = String()       // View Rx epc
@@ -193,6 +187,7 @@ class Controller: ObservableObject {
     address  = receiveEl.address
     udpData  = receiveEl.udpData
     rxContents = address + ": " + udpData
+    rxSubContents = ""
     let esv  = receiveEl.esv
     let seoj = receiveEl.seoj
     let deoj = receiveEl.deoj
@@ -218,10 +213,11 @@ class Controller: ObservableObject {
     case 0x63:  // INF_Req: ignore
       break
     case 0x72, 0x73:  // Get_Res(0x72) or INF(0x73)
-      print("case 0x72 0x73")
-      let rxEpc = String(format:"%02X", receiveEl.messages[0].epc) + " " + propertyName(classCode: seoj.classCode, epc: epc)
-      let rxEdt = String(receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()) +
-        decodeEdt(classCode: seoj.classCode, epc: epc, edt: receiveEl.messages[0].edt)
+      print("case ESV 0x72 0x73")
+      let epcCode = String(format:"%02X", receiveEl.messages[0].epc)
+      let rxEpc = epcCode + " " + propertyName(classCode: seoj.classCode, epc: epc)
+      let edtCode = receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()
+      let rxEdt = edtCode + decodeEdt(classCode: seoj.classCode, epcCode: epcCode, edtCode: edtCode)
       rxSubContents = "EPC:\(rxEpc) EDT:\(rxEdt)"
 
       switch epc {
@@ -316,15 +312,22 @@ class Controller: ObservableObject {
     return propertyName
   }
   
-  func decodeEdt(classCode: String, epc: UInt8, edt: [UInt8]) -> String {
-    var elProp = EL.deviceDescriptions[classCode]?.props[String(format:"%02X", epc)]
+  func decodeEdt(classCode: String, epcCode: String, edtCode: String) -> String {
+    var elProp = EL.deviceDescriptions[classCode]?.props[epcCode]
     if elProp == nil {
-      elProp = EL.superClass[String(format:"%02X", epc)]
+      elProp = EL.superClass[epcCode]
     }
     if elProp == nil {
       return ""
     } else {
-      return " \(elProp?.state?[String(format:"%02X", edt[0])] ?? "")" 
+      if elProp?.type == .state {
+        return " \(elProp?.state?[edtCode] ?? "")"
+      } else if elProp?.type == .number {
+        // edtCode を 数値に変換して 10進数のString にする
+        return " \(Int(edtCode, radix: 16) ?? 0)"
+      } else {
+        return ""
+      }
     }
   }
 
@@ -348,8 +351,53 @@ class Controller: ObservableObject {
       print("Send failed")
     }
     txContents = sendEl.udpData
-//    udpSentData = sendEl.udpData
     tid.increment()
+  }
+  
+  func sendFromUi() {
+    // edtの処理
+    var edt: [UInt8]
+    if esvCodeList[selectedEsv] == "61" {
+      if edtDataType == .state {
+        edt = Array(repeating: UInt8(edtCodeList[selectedEdt], radix:16)!, count:1)
+      } else if edtDataType == .number {
+        edt = uintToUInt8(a:UInt(edtValueFromTextField)!, n:elProp.size)
+      } else {  // edtDataType == .raw
+        edt = uintToUInt8(a:UInt(edtValueFromTextField, radix:16)!, n:elProp.size)
+      }
+    } else {
+      edt = []
+    }
+    send(
+      address: addressList[selectedNode],
+      deoj: nodes[selectedNode].deviceObjs[selectedEoj].eoj,
+      esv: UInt8(esvCodeList[selectedEsv], radix:16)!,
+      epc: UInt8(epcCodeList[selectedEpc], radix:16)!,
+      edt: edt)
+  }
+  
+  /// Convert UInt data to n x UInt8 data
+  /// - parameter a: Int data, n: byte size
+  /// - returns: ex 0x123456->(0x12,0x34,0x56) 0x12345678->(0x12,0x34,0x56,0x78)
+  func uintToUInt8(a:UInt?, n:Int) -> [UInt8] { // n = 1...4
+    var returnValue = [UInt8]()
+    if (0 < n) && (n <= 4) {
+      // UInt -> NSData
+      if var src = a {
+        let data = NSData(bytes: &src, length: MemoryLayout<UInt>.size)
+        // NSData -> [UInt8]    Caution: byte order
+        var buffer = [UInt8](repeating: 0x00, count: data.length) // init Array [(UInt8)]
+        data.getBytes(&buffer, length: data.length)           // NSData -> buffer: [(UInt8)]
+        for i in 0..<n {
+          returnValue.insert(buffer[i], at: 0)
+        }
+      }
+    }
+    return returnValue
+  }
+  
+  func search() {
+    send(address: addressList[selectedNode],epc: UInt8(0xD6))
   }
     
   // decode property map

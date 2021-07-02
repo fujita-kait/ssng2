@@ -39,7 +39,7 @@ struct EL {
   
   // ESV
 //  static let esv:[String:String] = ["60":"SetI","61":"SetC","62":"Get","63":"Inf_Req","73":"Inf"]
-  static let esv:[String:String] = ["61":"SetC","62":"Get","73":"Inf"]
+  static let esv:[String:String] = ["61":"SetC","62":"Get"]
 
   // Data type "state"
   static let stateLevelAndAuto:[String:String] = ["41":"Automatic","31":"1","32":"2","33":"3","34":"4","35":"5","36":"6","37":"7","38":"8"]

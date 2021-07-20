@@ -11,6 +11,7 @@ struct ContentView: View {
   @ObservedObject var controller = Controller()
   @State private var edtInputValue = ""
   @State private var flagEditting = false
+  @State private var inputDataIscorrect = true
   
   var body: some View {
     GeometryReader { geometry in
@@ -19,19 +20,13 @@ struct ContentView: View {
           Text(" ")
           Button(action: {
             print("Send EL")
+            self.edtInputValue = "" // Clear TextField
             controller.sendFromUi()
-            //            controller.send(
-            //              address: controller.addressList[controller.selectedNode],
-            //              deoj: controller.nodes[controller.selectedNode].deviceObjs[controller.selectedEoj].eoj,
-            //              esv: UInt8(controller.esvCodeList[controller.selectedEsv], radix:16)!,
-            //              epc: UInt8(controller.epcCodeList[controller.selectedEpc], radix:16)!,
-            //              edt: Array(repeating: edts[controller.selectedEdt], count:1))
           }) {
             Text("SEND ").font(.title2)
           }
           Button(action: {
             print("SEARCH")
-            //            controller.send(address: controller.addressList[controller.selectedNode],epc: UInt8(0xD6))
             controller.search()
           }) {
             Text("SEARCH").font(.title2)
@@ -131,36 +126,42 @@ struct ContentView: View {
                 .labelsHidden().frame(width: geometry.size.width * (5/20), height: 100).clipped()
                 Text("\(controller.footerPvEdt)").font(.callout)
               } else if controller.edtDataType == .number {
-                Spacer()
-                Text("10進数で値を入力").font(.callout)
-                TextField("28", text: $edtInputValue,
-                          onEditingChanged: { begin in
-                            if begin {
-                              self.flagEditting = true
-                            } else {
-                              self.flagEditting = false
-                            }
-                          },
-                          /// リターンキーが押された時の処理
-                          onCommit: {
-                            controller.edtValueFromTextField = "\(self.edtInputValue)"
-                          })
-                  .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
-                  .padding()
-                  // 編集フラグがONの時に枠に影を付ける
-                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
-                  .id(controller.idPvEdt)
-                  .labelsHidden().frame(width: geometry.size.width * (5/20)).clipped()
-                Text(controller.edtNumberNote).font(.callout)
-                Spacer()
-                Text("").font(.callout)
-              } else {  // data type is raw
-                Spacer()
-                if controller.elProp.size == 0 {
-                  Text("16進数で値を入力").font(.callout)
-                } else {
-                  Text("16進数で\(controller.elProp.size)バイトの値を入力").font(.callout)
+                Spacer().frame(height: 10)
+                Text("10進数 \(controller.edtNumberMultiple)").font(.callout)
+                HStack {
+                  TextField("28", text: $edtInputValue,
+                            onEditingChanged: { begin in
+                              if begin {
+                                self.flagEditting = true
+                              } else {
+                                self.flagEditting = false
+                              }
+                            },
+                            /// リターンキーが押された時の処理
+                            onCommit: {
+                              controller.edtValueFromTextField = "\(self.edtInputValue)"
+                            }).keyboardType(.numberPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
+                    // 編集フラグがONの時に枠に影を付ける
+                    .shadow(color: flagEditting ? .blue : .clear, radius: 3)
+                    .id(controller.idPvEdt)
+                    .labelsHidden().frame(width: geometry.size.width * (3/20), height: 40).clipped()
+                  Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    controller.edtValueFromTextField = "\(self.edtInputValue)"
+                  }) {
+                    Text("return").font(.callout)
+                  }
                 }
+                Spacer().frame(height: 48)
+              } else {  // data type is raw
+                Spacer().frame(height: 10)
+                if controller.elProp.size == 0 {
+                  Text("16進数").font(.callout)
+                } else {
+                  Text("16進数 \(controller.elProp.size) Byte").font(.callout)
+                }
+                HStack {
                 TextField("FFFF", text: $edtInputValue,
                           onEditingChanged: { begin in
                             if begin {
@@ -171,21 +172,63 @@ struct ContentView: View {
                           },
                           /// リターンキーが押された時の処理
                           onCommit: {
+                            if controller.validateInputData(a: self.edtInputValue, n: controller.elProp.size) {
+                              inputDataIscorrect = true
+                              print("Input data is correct!")
+                            } else {
+                              inputDataIscorrect = false
+                              print("Input data is wrong!")
+                            }
                             controller.edtValueFromTextField = "\(self.edtInputValue)"
                           })
+                  .foregroundColor(inputDataIscorrect ? .black : .red)
                   .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
-                  .padding()
-                  // 編集フラグがONの時に枠に影を付ける
-                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
+                  .autocapitalization(UITextAutocapitalizationType.allCharacters)
+                  .shadow(color: flagEditting ? .blue : .clear, radius: 3) // 編集フラグがONの時に枠に影を付ける
                   .id(controller.idPvEdt)
-                  .labelsHidden().frame(width: geometry.size.width * (5/20)).clipped()
-                Text("").font(.callout)
-                Spacer()
-                Text("").font(.callout)              }
+                  .labelsHidden().frame(width: geometry.size.width * (3/20), height: 40).clipped()
+                  Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    controller.edtValueFromTextField = "\(self.edtInputValue)"
+                  }) {
+                    Text("return").font(.callout)
+                  }
+                }
+                Spacer().frame(height: 48)
+              }
             } else {
-              Text("").font(.headline)
-              Spacer().frame(height: 100)
-              Text("").font(.callout)
+              
+//              Text("EDT").font(.headline)
+//              Spacer().frame(height: 10)
+//              Text("10進数").font(.callout)
+//              HStack {
+//                TextField("28", text: $edtInputValue,
+//                          onEditingChanged: { begin in
+//                            if begin {
+//                              self.flagEditting = true
+//                            } else {
+//                              self.flagEditting = false
+//                            }
+//                          },
+//                          /// リターンキーが押された時の処理
+//                          onCommit: {
+//                            controller.edtValueFromTextField = "\(self.edtInputValue)"
+//                          }).keyboardType(.numberPad)
+//                  .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
+//                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
+//                  .id(controller.idPvEdt)
+//                  .labelsHidden().frame(width: geometry.size.width * (3/20), height: 40).clipped()
+//                //                Text(controller.edtNumberMultiple).font(.callout)
+//                Button(action: {
+//                  print("return")
+//                }) {
+//                  Text("return").font(.callout)
+//                }
+//              }
+//              Spacer().frame(height: 48)
+                            Text("").font(.headline)
+                            Spacer().frame(height: 100)
+                            Text("").font(.callout)
             }
           }.frame(width: geometry.size.width * (5/20))
         }

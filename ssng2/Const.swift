@@ -1,6 +1,6 @@
 // ssng2:Const.swift
 //
-// Created by Hiro Fujita on 2021.06.02
+// Created by Hiro Fujita on 2021.07.19
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -149,6 +149,12 @@ struct EL {
                     props:["E0":ElProp(name:"気圧計測値",size:2,type:.number,multiple:0.1)]),
     "0130":ElDevObj(name:"エアコン",
                     props:[
+                      "90":ElProp(name:"ONタイマ予約設定",size:1,type:.state,state:["41":"時刻予約、相対時間予約共に入","42":"予約切","43":"時刻予約のみ入","44":"相対時間予約のみ入"]),
+                      "91":ElProp(name:"ONタイマ時刻設定値",size:2,type:.raw),
+                      "92":ElProp(name:"ONタイマ相対時間設定値",size:2,type:.raw),
+                      "94":ElProp(name:"OFFタイマ予約設定",size:1,type:.state,state:["41":"時刻予約、相対時間予約共に入","42":"予約切","43":"時刻予約のみ入","44":"相対時間予約のみ入"]),
+                      "95":ElProp(name:"OFFタイマ時刻設定値",size:2,type:.raw),
+                      "96":ElProp(name:"OFFタイマ相対時間設定値",size:2,type:.raw),
                       "B0":ElProp(name:"運転モード",size:1,type:.state,state:["41":"自動","42":"冷房","43":"暖房","44":"除湿","45":"送風","40":"その他"]),
                       "B1":ElProp(name:"温度自動設定",size:1,type:.state,state:["41":"AUTO","42":"MANUAL"]),
                       "B3":ElProp(name:"温度設定値",size:1,type:.number),

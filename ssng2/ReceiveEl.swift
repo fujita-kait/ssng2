@@ -89,8 +89,6 @@ class ReceiveEl {
         messagesGet.append(message)
         idx += (Int(pdc) + 2)
       }
-//      print("ReceiveEL: messagesSet: \(messagesSet)")
-//      print("ReceiveEL: messagesGet: \(messagesGet)")
     }
 
     var stringArray = rawData.map{(a: UInt8) -> String in String(format:"%02X", a)}

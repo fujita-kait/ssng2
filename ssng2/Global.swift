@@ -2,8 +2,8 @@
 //
 //  Global structures and functions
 //
-//  Created by Hiro Fujita on 2016.02.03, updated on 2016.03.31
-//  Copyright (c) 2016 Hiro Fujita. All rights reserved.
+// Created by Hiro Fujita on 2021.07.21
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
 

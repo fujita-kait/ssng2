@@ -1,6 +1,6 @@
 // ssng2:Const.swift
 //
-// Created by Hiro Fujita on 2021.07.19
+// Created by Hiro Fujita on 2021.07.21
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -8,7 +8,6 @@ import Foundation
 struct EL {
   static let mcAddress = "224.0.23.0"
   static let portEL = 3610
-//  static let portEL = 3611
   static let ehd = Ehd(d1: 0x10, d2: 0x81)
   static let defaultNode = Node(
     address:"224.0.23.0",makerCode:"000077",

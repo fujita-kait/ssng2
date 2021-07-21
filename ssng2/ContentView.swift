@@ -1,6 +1,6 @@
 // ssng2:ContentView.swift
 //
-// Created by Hiro Fujita on 2021.06.02
+// Created by Hiro Fujita on 2021.07.21
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import SwiftUI
@@ -197,38 +197,9 @@ struct ContentView: View {
                 Spacer().frame(height: 48)
               }
             } else {
-              
-//              Text("EDT").font(.headline)
-//              Spacer().frame(height: 10)
-//              Text("10進数").font(.callout)
-//              HStack {
-//                TextField("28", text: $edtInputValue,
-//                          onEditingChanged: { begin in
-//                            if begin {
-//                              self.flagEditting = true
-//                            } else {
-//                              self.flagEditting = false
-//                            }
-//                          },
-//                          /// リターンキーが押された時の処理
-//                          onCommit: {
-//                            controller.edtValueFromTextField = "\(self.edtInputValue)"
-//                          }).keyboardType(.numberPad)
-//                  .textFieldStyle(RoundedBorderTextFieldStyle()) // 入力域を枠で囲む
-//                  .shadow(color: flagEditting ? .blue : .clear, radius: 3)
-//                  .id(controller.idPvEdt)
-//                  .labelsHidden().frame(width: geometry.size.width * (3/20), height: 40).clipped()
-//                //                Text(controller.edtNumberMultiple).font(.callout)
-//                Button(action: {
-//                  print("return")
-//                }) {
-//                  Text("return").font(.callout)
-//                }
-//              }
-//              Spacer().frame(height: 48)
-                            Text("").font(.headline)
-                            Spacer().frame(height: 100)
-                            Text("").font(.callout)
+              Text("").font(.headline)
+              Spacer().frame(height: 100)
+              Text("").font(.callout)
             }
           }.frame(width: geometry.size.width * (5/20))
         }

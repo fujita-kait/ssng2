@@ -1,6 +1,6 @@
 // ssng2:Controller.swift
 //
-// Created by Hiro Fujita on 2021.06.02
+// Created by Hiro Fujita on 2021.07.21
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -17,9 +17,6 @@ class Controller: ObservableObject {
       selectedEpc = 0
       selectedEdt = 0
       idPvEoj = UUID()  // Update PickerView(EOJ)
-      //      idPvEsv = UUID()  // Update PickerView(ESV)
-      //      idPvEpc = UUID()  // Update PickerView(EPC)
-      //      idPvEdt = UUID()  // Update PickerView(EDT)
       print("PV-IP changed, selectedNode: \(selectedNode)")
     }
   }
@@ -30,8 +27,6 @@ class Controller: ObservableObject {
       selectedEpc = 0
       selectedEdt = 0
       idPvEsv = UUID()  // Update PickerView(ESV)
-      //      idPvEpc = UUID()  // Update PickerView(EPC)
-      //      idPvEdt = UUID()  // Update PickerView(EDT)
       print("PV-EOJ changed, selectedEoj: \(selectedEoj)")
     }
   }
@@ -45,10 +40,8 @@ class Controller: ObservableObject {
       // 存在しない場合は selectedEpc = 0
       selectedEpc = epcCodeList.firstIndex(of: selectedEpcCode) ?? 0
       selectedEpcCode = epcCodeList[selectedEpc]
-      //      selectedEpc = 0
       selectedEdt = 0
       idPvEpc = UUID()  // Update PickerView(EPC)
-      //      idPvEdt = UUID()  // Update PickerView(EDT)
       print("PV-ESV changed, selectedEsv: \(selectedEsv)")
     }
   }
@@ -146,9 +139,6 @@ class Controller: ObservableObject {
     let to = eojCode.index(eojCode.startIndex, offsetBy:4)
     return String(eojCode[..<to])
   }
-  //  var selectedEpcCode: String {
-  //    epcCodeList[selectedEpc]
-  //  }
   var footerPvEpc: String {
     return propertyName(classCode: selectedEojCode2bytes, epcCode: selectedEpcCode)
   }
@@ -170,14 +160,8 @@ class Controller: ObservableObject {
   
   var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
   var udpData = String()     // View Rx data: received UDP data in HEX string
-  
-  //  @Published var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
-  //  @Published var udpData = String()     // View Rx data: received UDP data in HEX string
-  //  @Published var rxEpc = String()       // View Rx epc
-  //  @Published var rxEdt = String()       // View Rx edt
-  
-  var receiveEl: ReceiveEl!    // for receiving data
-  var sendEl: SendEl!          // for sending data
+  var receiveEl: ReceiveEl!  // for receiving data
+  var sendEl: SendEl!        // for sending data
   
   private var tid = Tid(d1: UInt8(0x00), d2: UInt8(0x00))
   private var spotDeviceInfo = (address:"", eoj:Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8()))
@@ -196,6 +180,13 @@ class Controller: ObservableObject {
   @objc func receive(_ notification: Notification) {
     address  = receiveEl.address
     udpData  = receiveEl.udpData
+    rxContents = ""
+
+    if myIpList.contains(address) {
+      print("\(address) is loopback, ignore")
+      return
+    }
+
     rxContents = address + ": " + udpData
     rxSubContents = ""
     let esv  = receiveEl.esv
@@ -239,10 +230,10 @@ class Controller: ObservableObject {
       // Instance ListS: append a node to nodes
       case 0xD5, 0xD6:
         print("case EPC:D5, D6")
-        if myIpList.contains(address) {
-          print("\(address) is loopback, ignore")
-          return
-        }
+//        if myIpList.contains(address) {
+//          print("\(address) is loopback, ignore")
+//          return
+//        }
         if addressList.contains(address) {
           print("\(address) is already in the IP list, ignore")
           return
@@ -319,19 +310,23 @@ class Controller: ObservableObject {
     }
   }
   
+  // get property name from class code and epc code
   // "0130" "B0" -> "運転モード"
   func propertyName(classCode: String, epcCode: String) -> String {
     //    print("propertyName: \(classCode) \(epcCode)")
-    if epcCode == "" { return " " }
+    if (classCode == "" || epcCode == "") { return " " }
     var propertyName = ""
+    
+    // node profile
     if classCode == "0EF0" {
       propertyName = EL.nodeProfile[epcCode]?.name ?? "unknown"
-    } else {
-      if UInt(epcCode, radix:16)! < UInt(0xA0) {
-        propertyName = EL.superClass[epcCode]?.name ?? "unknown"
-      } else {
-        propertyName = EL.deviceDescriptions[classCode]?.props[epcCode]?.name ?? "unknown"
-      }
+      return propertyName
+    }
+
+    // device object
+    propertyName = EL.deviceDescriptions[classCode]?.props[epcCode]?.name ?? "unknown"
+    if propertyName == "unknown" {
+      propertyName = EL.superClass[epcCode]?.name ?? "unknown"
     }
     return propertyName
   }
@@ -363,44 +358,6 @@ class Controller: ObservableObject {
       return ""
     }
   }
-  
-  //
-  //
-  //    } else {
-  //      return ""
-  //    }
-  //
-  //      if elProp == nil {
-  //        return ""
-  //      } else {
-  //        if elProp?.type == .state {
-  //          return " \(elProp?.state?[edtCode] ?? "")"
-  //        } else if elProp?.type == .number {
-  //          // edtCode を 数値に変換して 10進数のString にする
-  //          return " \(Int(edtCode, radix: 16) ?? 0)"
-  //        } else {
-  //          return ""
-  //        }
-  //      }
-  //    } else if EL.deviceDescriptions[classCode] == nil {  // no info in the EL.deviceDescriptions
-  //      return ""
-  //    } else {
-  //      var elProp = EL.deviceDescriptions[classCode]?.props[epcCode]
-  //      if elProp == nil {
-  //        elProp = EL.superClass[epcCode]
-  //      }
-  //      if elProp == nil {
-  //        return ""
-  //      } else {
-  //        if elProp?.type == .state {
-  //          return " \(elProp?.state?[edtCode] ?? "")"
-  //        } else if elProp?.type == .number {
-  //          // edtCode を 数値に変換して 10進数のString にする
-  //          return " \(Int(edtCode, radix: 16) ?? 0)"
-  //        } else {
-  //          return ""
-  //        }
-  //      }
   
   /// Send ECHONET Lite message (OPC: 1)
   /// default value of argument: IP:224.0.23.0, SEOJ:05FF01, DEOJ:0EF001, ESV:62, EPC:80, EDT:none

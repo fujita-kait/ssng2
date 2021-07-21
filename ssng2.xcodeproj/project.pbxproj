@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		2829F89D1B9D25C91FC0EE42 /* Pods_ssng2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 346FB42E498FFD13B962A79C /* Pods_ssng2.framework */; };
+		577F5B1526A811F2004A1520 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A444CE26454A4000FAFEC1 /* Assets.xcassets */; };
 		57A444CB26454A3F00FAFEC1 /* ssng2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A444CA26454A3F00FAFEC1 /* ssng2App.swift */; };
 		57A444CD26454A3F00FAFEC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A444CC26454A3F00FAFEC1 /* ContentView.swift */; };
-		57A444CF26454A4000FAFEC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A444CE26454A4000FAFEC1 /* Assets.xcassets */; };
 		57A444D226454A4000FAFEC1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A444D126454A4000FAFEC1 /* Preview Assets.xcassets */; };
 		57BB8B6A264A04DB00B0DA72 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B64264A04DA00B0DA72 /* Global.swift */; };
 		57BB8B6B264A04DB00B0DA72 /* SendEl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BB8B65264A04DA00B0DA72 /* SendEl.swift */; };
@@ -178,8 +178,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				577F5B1526A811F2004A1520 /* Assets.xcassets in Resources */,
 				57A444D226454A4000FAFEC1 /* Preview Assets.xcassets in Resources */,
-				57A444CF26454A4000FAFEC1 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +372,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ssng2/ssng2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"ssng2/Preview Content\"";
 				DEVELOPMENT_TEAM = YTNQVP8885;
 				ENABLE_PREVIEWS = YES;
@@ -396,6 +397,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ssng2/ssng2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"ssng2/Preview Content\"";
 				DEVELOPMENT_TEAM = YTNQVP8885;
 				ENABLE_PREVIEWS = YES;

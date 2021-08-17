@@ -1,11 +1,7 @@
+//  ssng2:getIFAddresses.swift
 //
-//  getIFAddresses.swift
-//  SSNG_iOS
-//
-//  Created by 藤田裕之 on 2015/10/11
-//  Copyright (c) 2015年 Hiro Fujita. All rights reserved.
-//
-//  get own IP address (IPv4 only)
+// Created by Hiro Fujita on 2021.08.17
+// Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
 
@@ -28,8 +24,8 @@ func getIFAddresses() -> [String] {
           var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
           if (getnameinfo(&addr!, socklen_t((addr?.sa_len)!), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST) == 0) {
             if let address = String(validatingUTF8: hostname) {
-              // ignore link local address (169.254.xxx.xxx)
-              if !address.hasPrefix("169.254") {
+              // ignore link local address (169.254.xxx.xxx, 10.254.xxx.xxx)
+              if (!address.hasPrefix("169.254") && !address.hasPrefix("10.254")) {
                 addresses.append(address)
               }
             }

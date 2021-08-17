@@ -1,6 +1,6 @@
 // ssng2:Controller.swift
 //
-// Created by Hiro Fujita on 2021.07.21
+// Created by Hiro Fujita on 2021.08.17
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -155,7 +155,8 @@ class Controller: ObservableObject {
   var edtValueFromTextField = ""
   
   @Published var txContents = String()  // View Tx: sent UDP data in HEX string
-  @Published var rxContents = String()  // View Rx: sent UDP data in HEX string
+  @Published var rxContents = String()  // View Rx: received UDP data in HEX string
+  @Published var rxInfContents = String()  // View Rx-INF: received INF data in HEX string
   @Published var rxSubContents = String()  // View Rx: EPC and EDT
   
   var address = String()     // View Rx: source IP Address: example: "192.168.1.2"
@@ -180,15 +181,15 @@ class Controller: ObservableObject {
   @objc func receive(_ notification: Notification) {
     address  = receiveEl.address
     udpData  = receiveEl.udpData
-    rxContents = ""
-
+    //    rxContents = ""
+    
     if myIpList.contains(address) {
       print("\(address) is loopback, ignore")
       return
     }
-
-    rxContents = address + ": " + udpData
-    rxSubContents = ""
+    
+    //    rxContents = address + ": " + udpData
+    //    rxSubContents = ""
     let esv  = receiveEl.esv
     let seoj = receiveEl.seoj
     let deoj = receiveEl.deoj
@@ -202,7 +203,7 @@ class Controller: ObservableObject {
     
     switch esv {
     case 0x60, 0x61:  // SetI or SetC: ignore
-      break
+      print("case ESV 0x60")
     case 0x62:  // Get: respond to 80, 8A and D6
       switch epc {
       case 0x80:
@@ -217,23 +218,25 @@ class Controller: ObservableObject {
         send(seoj: deoj, deoj: seoj, esv: UInt8(0x52), epc: epc, edt: edt)
       }
     case 0x63:  // INF_Req: ignore
-      break
+      print("case ESV 0x63")
     case 0x72, 0x73:  // Get_Res(0x72) or INF(0x73)
       print("case ESV 0x72 0x73")
       let epcCode = String(format:"%02X", receiveEl.messages[0].epc)
       let rxEpc = epcCode + " " + propertyName(classCode: seoj.classCode, epcCode: epcCode)
       let edtCode = receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()
       let rxEdt = edtCode + decodeEdt(classCode: seoj.classCode, epcCode: epcCode, edtCode: edtCode)
-      rxSubContents = "EPC:\(rxEpc) EDT:\(rxEdt)"
+
+      if (esv == 0x72) {
+        rxContents = address + ": " + udpData
+        rxSubContents = "EPC:\(rxEpc) EDT:\(rxEdt)"
+      } else {
+        rxInfContents = "Rx-INF: " + address + ": " + udpData
+      }
       
       switch epc {
       // Instance ListS: append a node to nodes
       case 0xD5, 0xD6:
         print("case EPC:D5, D6")
-//        if myIpList.contains(address) {
-//          print("\(address) is loopback, ignore")
-//          return
-//        }
         if addressList.contains(address) {
           print("\(address) is already in the IP list, ignore")
           return
@@ -295,16 +298,20 @@ class Controller: ObservableObject {
           spotDeviceInfo.address = ""
           spotDeviceInfo.eoj = Eoj(d1: UInt8(), d2: UInt8(), d3: UInt8())
         }
-      default: break
+      default:
+        print("case default")
       }
     case 0x74:  // INFC
-      break
+      print("case ESV 0x74")
     case 0x6E:  // SetGet -> send SetGet_SNA
       send(seoj: deoj, deoj: seoj, esv: UInt8(0x5E), epc: epc, edt: edt)
       print("Obj:ESV=0x5E:SetGet_SNA, send SNA: \(sendEl.esv)")
     case 0x71:  // Set_Res
       print("Obj:ESV=0x71:SetRes")
-      break
+      rxContents = address + ": " + udpData
+    case 0x52:  // Get_SNA
+      print("Obj:ESV=0x52:Get_SNA")
+      rxContents = address + ": " + udpData
     default:
       print("Obj:ESV error \(esv)")
     }
@@ -322,7 +329,7 @@ class Controller: ObservableObject {
       propertyName = EL.nodeProfile[epcCode]?.name ?? "unknown"
       return propertyName
     }
-
+    
     // device object
     propertyName = EL.deviceDescriptions[classCode]?.props[epcCode]?.name ?? "unknown"
     if propertyName == "unknown" {
@@ -378,7 +385,8 @@ class Controller: ObservableObject {
     if (!sendEl.send(address: address)) {
       print("Send failed")
     }
-    txContents = sendEl.udpData
+    // Update txContents only when SEND Button is pressed
+    //    txContents = sendEl.udpData
     tid.increment()
   }
   
@@ -402,6 +410,11 @@ class Controller: ObservableObject {
       esv: UInt8(esvCodeList[selectedEsv], radix:16)!,
       epc: UInt8(epcCodeList[selectedEpc], radix:16)!,
       edt: edt)
+    // Update UI of "TX:"
+    txContents = sendEl.udpData
+    rxContents = ""
+    rxInfContents = ""
+    rxSubContents = ""
   }
   
   func validateInputData(a:String, n:Int) -> Bool {

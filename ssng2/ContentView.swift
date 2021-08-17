@@ -1,6 +1,6 @@
 // ssng2:ContentView.swift
 //
-// Created by Hiro Fujita on 2021.07.21
+// Created by Hiro Fujita on 2021.08.17
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import SwiftUI
@@ -210,6 +210,7 @@ struct ContentView: View {
             Text("Tx: \(controller.txContents)")
             Text("Rx: \(controller.rxContents)")
             Text("\(controller.rxSubContents)")
+            Text("\(controller.rxInfContents)")
           }.environment(\.defaultMinListRowHeight, 0).font(.callout)
         }
       }

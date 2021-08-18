@@ -181,15 +181,12 @@ class Controller: ObservableObject {
   @objc func receive(_ notification: Notification) {
     address  = receiveEl.address
     udpData  = receiveEl.udpData
-    //    rxContents = ""
     
     if myIpList.contains(address) {
       print("\(address) is loopback, ignore")
       return
     }
     
-    //    rxContents = address + ": " + udpData
-    //    rxSubContents = ""
     let esv  = receiveEl.esv
     let seoj = receiveEl.seoj
     let deoj = receiveEl.deoj
@@ -224,7 +221,7 @@ class Controller: ObservableObject {
       let epcCode = String(format:"%02X", receiveEl.messages[0].epc)
       let rxEpc = epcCode + " " + propertyName(classCode: seoj.classCode, epcCode: epcCode)
       let edtCode = receiveEl.messages[0].edt.map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()
-      let rxEdt = edtCode + decodeEdt(classCode: seoj.classCode, epcCode: epcCode, edtCode: edtCode)
+      let rxEdt = edtCode + decodeEdt(classCode: seoj.classCode, epcCode: epcCode, edtCode: edtCode, edt:receiveEl.messages[0].edt)
 
       if (esv == 0x72) {
         rxContents = address + ": " + udpData
@@ -339,7 +336,11 @@ class Controller: ObservableObject {
   }
   
   // "0130" "B0" "42" -> "冷房"
-  func decodeEdt(classCode: String, epcCode: String, edtCode: String) -> String {
+  func decodeEdt(classCode: String, epcCode: String, edtCode: String, edt:[UInt8]) -> String {
+    // 9D, 9E, 9F: decode property map
+    if ((epcCode == "9D") || (epcCode == "9E") || (epcCode == "9F")) {
+      return ": " + decodePropertyMap(edt: edt).map{(a: UInt8) -> String in String(format:"%02X", a)}.joined()
+    }
     var elProp:ElProp?
     if classCode == "0EF0" {
       elProp = EL.nodeProfile[epcCode]
@@ -385,8 +386,10 @@ class Controller: ObservableObject {
     if (!sendEl.send(address: address)) {
       print("Send failed")
     }
-    // Update txContents only when SEND Button is pressed
-    //    txContents = sendEl.udpData
+    // Update txContents if ESV is SetC, Get or INF
+    if (esv == UInt8(0x61) || esv == UInt8(0x62) || esv == UInt8(0x73)){
+      txContents = sendEl.udpData
+    }
     tid.increment()
   }
   
@@ -411,7 +414,6 @@ class Controller: ObservableObject {
       epc: UInt8(epcCodeList[selectedEpc], radix:16)!,
       edt: edt)
     // Update UI of "TX:"
-    txContents = sendEl.udpData
     rxContents = ""
     rxInfContents = ""
     rxSubContents = ""

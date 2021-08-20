@@ -67,9 +67,9 @@ struct ContentView: View {
               }
             }
             .id(controller.idPvNode)
-            .labelsHidden().frame(width: geometry.size.width * (4/20), height: 100).clipped()
+            .labelsHidden().frame(width: geometry.size.width * (5/20), height: 100).clipped()
             Text("\(controller.footerPvIp)").font(.callout)
-          }.frame(width: geometry.size.width * (4/20))
+          }.frame(width: geometry.size.width * (5/20))
           
           
           // PV-EOJ
@@ -107,9 +107,9 @@ struct ContentView: View {
               }
             }
             .id(controller.idPvEpc)
-            .labelsHidden().frame(width: geometry.size.width * (6/20), height: 100).clipped()
+            .labelsHidden().frame(width: geometry.size.width * (5/20), height: 100).clipped()
             Text("\(controller.footerPvEpc)").font(.callout)
-          }.frame(width: geometry.size.width * (6/20))
+          }.frame(width: geometry.size.width * (5/20))
           
           // View-EDT
           VStack(spacing: 0.0) {

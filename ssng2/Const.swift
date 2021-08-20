@@ -1,6 +1,6 @@
 // ssng2:Const.swift
 //
-// Created by Hiro Fujita on 2021.07.21
+// Created by Hiro Fujita on 2021.08.20
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -18,7 +18,10 @@ struct EL {
       DeviceObj(eoj: Eoj(d1:0x01,d2:0x30,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x01,d2:0x33,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x01,d2:0x35,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x01,d2:0x56,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x01,d2:0x57,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x60,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x63,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x6B,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x6F,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x72,d3:0x01)),
@@ -27,11 +30,19 @@ struct EL {
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x7A,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x7B,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x7D,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x7E,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x80,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x81,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x82,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x87,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x88,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0x8D,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x90,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x02,d2:0x91,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x02,d2:0xA6,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x03,d2:0xB7,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x03,d2:0xCB,d3:0x01)),
+      DeviceObj(eoj: Eoj(d1:0x05,d2:0xFD,d3:0x01)),
       DeviceObj(eoj: Eoj(d1:0x05,d2:0xFF,d3:0x01))
     ]
   )
@@ -101,6 +112,7 @@ struct EL {
     "000087":"アイ･オー･データ機器",
     "00008A":"富士通ゼネラル",
     "00008C":"九電テクノシステムズ",
+    "000095":"大和電気",
     "000097":"未来技術研究所",
     "000099":"東京電力ホールディングス",
     "00009A":"関西電力",
@@ -113,6 +125,7 @@ struct EL {
     "0000AD":"デルタ電子",
     "0000AE":"四国電力",
     "0000B0":"ナルテック",
+    "0000B1":"IIJ",
     "0000B3":"TOPPERSプロジェクト",
     "0000B5":"中国電力",
     "0000B6":"文化シヤッター",
@@ -171,12 +184,32 @@ struct EL {
                     ]),
     "0135":ElDevObj(name:"空気清浄機",
                     props:["A0":ElProp(name:"風量設定",size:1,type:.state,state:stateLevelAndAuto)]),
+    "0156":ElDevObj(name:"業務用パッケージエアコン室内機",
+                    props:[
+                      "AC":ElProp(name:"サーモ状態",size:1,type:.state,state:["41":"YES","42":"NO"]),
+                      "AE":ElProp(name:"自動運転時運転モード状態",size:1,type:.state,state:["40":"その他","42":"冷房","43":"暖房","44":"除湿","45":"送風"]),
+                      "B0":ElProp(name:"運転モード状態",size:1,type:.state,state:["41":"自動","42":"冷房","43":"暖房","44":"除湿","45":"送風"]),
+                      "B3":ElProp(name:"温度設定値",size:1,type:.number),
+                      "CA":ElProp(name:"グループ情報",size:1,type:.number)
+                    ]),
+    "0157":ElDevObj(name:"業務用パッケージエアコン室外機",
+                    props:[
+                      "CA":ElProp(name:"グループ情報",size:1,type:.number),
+                      "DB":ElProp(name:"室外機消費電力計測値",size:4,type:.number),
+                      "DD":ElProp(name:"室外機節電可能消費電力",size:4,type:.number),
+                      "DE":ElProp(name:"室外機消費電力制限設定",size:4,type:.number)
+                    ]),
     "0260":ElDevObj(name:"電動ブラインド",
                     props:[
                       "E0":ElProp(name:"開閉動作設定",size:1,type:.state,state:["41":"開","42":"閉","43":"停止"]),
                       "E1":ElProp(name:"開度レベル設定",size:1,type:.number),
                       "E2":ElProp(name:"ブラインド角度設定値",size:1,type:.number),
                       "E3":ElProp(name:"開閉速度設定",size:1,type:.state,state:stateL_H)
+                    ]),
+    "0263":ElDevObj(name:"電動雨戸・シャッター",
+                    props:[
+                      "E0":ElProp(name:"開閉動作設定",size:1,type:.state,state:["41":"開","42":"閉","43":"停止"]),
+                      "EA":ElProp(name:"開閉状態",size:1,type:.state,state:["41":"全開","42":"全閉","43":"開動作中","44":"閉動作中","45":"途中停止"])
                     ]),
     "026B":ElDevObj(name:"温水器",
                     props:[
@@ -218,6 +251,45 @@ struct EL {
                       "E4":ElProp(name:"蓄電残量３",size:1,type:.number),
                       "E6":ElProp(name:"蓄電池タイプ",size:1,type:.state,state:["01":"鉛","02":"ニッケル水素","03":"NiCd","04":"リチウムイオン","05":"Zn","06":"充電式アルカリ"])
                     ]),
+    "027E":ElDevObj(name:"電気自動車充放電器",
+                    props:[
+                      "C0":ElProp(name:"車載電池の放電可能容量値1",size:4,type:.number),
+                      "C1":ElProp(name:"車載電池の放電可能容量値2",size:4,type:.number,multiple:0.1),
+                      "C2":ElProp(name:"車載電池の放電可能残容量1",size:4,type:.number),
+                      "C3":ElProp(name:"車載電池の放電可能残容量2",size:4,type:.number,multiple:0.1),
+                      "C4":ElProp(name:"車載電池の放電可能残容量3",size:1,type:.number),
+                      "C5":ElProp(name:"定格充電能力",size:4,type:.number),
+                      "C7":ElProp(name:"車両接続・充放電可否状態",size:1,type:.state,state:["30":"車両未接続","40":"車両接続・充電不可・放電不可","41":"車両接続・充電可・放電不可","42":"車両接続・充電不可・放電可","43":"車両接続・充電可・放電可"]),
+                      "C8":ElProp(name:"最小最大充電電力値",size:8,type:.raw),
+                      "C9":ElProp(name:"最小最大放電電力値",size:8,type:.raw),
+                      "CA":ElProp(name:"最小最大充電電流値",size:8,type:.raw),
+                      "CB":ElProp(name:"最小最大放電電流値",size:8,type:.raw),
+                      "CC":ElProp(name:"充放電器タイプ",size:1,type:.state,state:["11":"AC_CPLT","12":"AC_HLC（充電のみ）","13":"AC_HLC（充放電可）","21":"DCタイプ_AA（充電のみ）","22":"DCタイプ_AA（充放電可）","23":"DCタイプ_AA（放電のみ）","31":"DCタイプ_BB（充電のみ）","32":"DCタイプ_BB（充放電可）","33":"DCタイプ_BB（放電のみ）","41":"DCタイプ_EE（充電のみ）","42":"DCタイプ_EE（充放電可）","43":"DCタイプ_EE（放電のみ）","51":"DCタイプ_FF（充電のみ）","52":"DCタイプ_FF（充放電可）","53":"DCタイプ_FF（放電のみ）"]),
+                      "CD":ElProp(name:"車両接続確認",size:1,type:.state,state:["10":"接続確認"]),
+                      "CE":ElProp(name:"車載電池の充電可能容量値",size:4,type:.number),
+                      "CF":ElProp(name:"車載電池の充電可能残容量値",size:4,type:.number),
+                      "D0":ElProp(name:"車載電池の使用容量値1",size:4,type:.number),
+                      "DC":ElProp(name:"充電方式",size:1,type:.state,state:["01":"最大充電電力充電","02":"余剰電力充電","03":"指定電力充電","04":"指定電流充電","05":"買電電力指定充電"]),
+                      "DD":ElProp(name:"放電方式",size:1,type:.state,state:["00":"その他","01":"最大放電電力放電","02":"負荷追従放電","03":"指定電力放電","04":"指定電流放電","05":"買電電力指定放電"]),
+                      "E2":ElProp(name:"車載電池の電池残容量1",size:4,type:.number),
+                      "E3":ElProp(name:"車載電池の電池残容量2",size:4,type:.number,multiple:0.1),
+                      "E4":ElProp(name:"車載電池の電池残容量3",size:1,type:.number),
+                      "E6":ElProp(name:"車両ID",size:25,type:.raw)
+                    ]),
+    "0280":ElDevObj(name:"電力量メータ",
+                    props:[
+                      "E0":ElProp(name:"積算電力量計測値",size:4,type:.number),
+                      "E2":ElProp(name:"積算電力量単位",size:1,type:.raw)
+                    ]),
+    "0281":ElDevObj(name:"水流量メータ",
+                    props:[
+                      "E0":ElProp(name:"積算水流量計測値",size:4,type:.number),
+                      "E1":ElProp(name:"積算水流量計測値単位",size:1,type:.raw)
+                    ]),
+    "0282":ElDevObj(name:"ガスメータ",
+                    props:[
+                      "E0":ElProp(name:"積算ガス消費量計測値",size:4,type:.number,multiple:0.001)
+                    ]),
     "0287":ElDevObj(name:"分電盤",
                     props:[
                       "C0":ElProp(name:"積算電力量:正",size:4,type:.number),
@@ -244,6 +316,20 @@ struct EL {
                       "EA":ElProp(name:"定時積算電力量:正方向",size:11,type:.number),
                       "EB":ElProp(name:"定時積算電力量:逆方向",size:11,type:.number)
                     ]),
+    "028D":ElDevObj(name:"スマート電力量サブメータ",
+                    props:[
+                      "D4":ElProp(name:"積算電力量単位（正方向、逆方向計測値）",size:1,type:.raw),
+                      "D7":ElProp(name:"積算電力量有効桁数",size:1,type:.number),
+                      "E0":ElProp(name:"積算履歴収集日",size:1,type:.number),
+                      "E1":ElProp(name:"積算電力量計測値（正方向計測値）",size:4,type:.number),
+                      "E2":ElProp(name:"積算電力量計測値履歴（正方向計測値）",size:193,type:.raw),
+                      "E3":ElProp(name:"積算電力量計測値（逆方向計測値）",size:4,type:.number),
+                      "E4":ElProp(name:"積算電力量計測値履歴（逆方向計測値）",size:193,type:.raw),
+                      "E7":ElProp(name:"瞬時電力計測値",size:4,type:.number),
+                      "E8":ElProp(name:"瞬時電流計測値",size:2,type:.number,multiple:0.1),
+                      "EA":ElProp(name:"定時積算電力量計測値（正方向計測値）",size:4,type:.number),
+                      "EB":ElProp(name:"定時積算電力量計測値（逆方向計測値）",size:4,type:.number)
+                    ]),
     "0290":ElDevObj(name:"一般照明",
                     props:[
                       "B0":ElProp(name:"照度レベル",size:1,type:.number),
@@ -253,6 +339,14 @@ struct EL {
                     ]),
     "0291":ElDevObj(name:"単機能照明",
                     props:["B0":ElProp(name:"照度レベル",size:1,type:.number)]),
+    "02A6":ElDevObj(name:"ハイブリッド給湯機",
+                    props:[
+                      "B0":ElProp(name:"沸き上げ自動設定",size:1,type:.state,state:["41":"自動沸き上げ","42":"手動沸き上げ","43":"手動沸き上げ停止"]),
+                      "B2":ElProp(name:"給湯沸き上げ中状態",size:1,type:.state,state:["41":"YES","42":"NO"]),
+                      "B3":ElProp(name:"暖房沸き上げ中状態",size:1,type:.state,state:["41":"YES","42":"NO"]),
+                      "B8":ElProp(name:"太陽光発電連携モード設定",size:1,type:.state,state:["41":"モード切","42":"自家消費","43":"売電優先","44":"経済"]),
+                      "C3":ElProp(name:"給湯中状態",size:1,type:.state,state:["41":"YES","42":"NO"])
+                    ]),
     "03B7":ElDevObj(name:"冷凍冷蔵庫",
                     props:[
                       "B0":ElProp(name:"ドア開閉状態",size:1,type:.state,state:["41":"開:OPEN","42":"閉:CLOSE"]),
@@ -262,6 +356,14 @@ struct EL {
                       "B4":ElProp(name:"氷温室ドア開閉状態",size:1,type:.state,state:["41":"開:OPEN","42":"閉:CLOSE"]),
                       "B5":ElProp(name:"野菜室ドア開閉状態",size:1,type:.state,state:["41":"開:OPEN","42":"閉:CLOSE"]),
                       "B6":ElProp(name:"切替室ドア開閉状態",size:1,type:.state,state:["41":"開:OPEN","42":"閉:CLOSE"])
+                    ]),
+    "03CB":ElDevObj(name:"電気掃除機",
+                    props:[
+                      "80":ElProp(name:"動作状態",size:1,type:.state,state:["30":"ON","31":"OFF"])
+                    ]),
+    "05FD":ElDevObj(name:"スイッチ",
+                    props:[
+                      "80":ElProp(name:"動作状態",size:1,type:.state,state:["30":"ON","31":"OFF"])
                     ]),
     "05FF":ElDevObj(name:"コントローラ",
                     props:["C0":ElProp(name:"コントローラID",size:40,type:.raw)])

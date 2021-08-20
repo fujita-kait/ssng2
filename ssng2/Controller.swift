@@ -1,6 +1,6 @@
 // ssng2:Controller.swift
 //
-// Created by Hiro Fujita on 2021.08.17
+// Created by Hiro Fujita on 2021.08.20
 // Copyright (c) 2021 Hiro Fujita. All rights reserved.
 
 import Foundation
@@ -123,7 +123,7 @@ class Controller: ObservableObject {
   // for footer of Picker View
   var footerPvIp: String {
     let makerCode = nodes[selectedNode].makerCode
-    return EL.makerCode[makerCode] ?? "unknown"
+    return EL.makerCode[makerCode] ?? makerCode
   }
   var footerPvEoj: String {
     let eojCode = eojCodeList[selectedEoj]
